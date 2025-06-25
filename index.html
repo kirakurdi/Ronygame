@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +10,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(to bottom, #1E3A8A 0%, #172B6B 100%); /* Dark blue gradient from image */
+            background: linear-gradient(to bottom, #1E3A8A 0%, #172B6B 100%); /* Dark blue gradient */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -165,412 +165,378 @@
             font-weight: bold;
             white-space: nowrap; /* Prevent wrapping */
             opacity: 0; /* Hidden by default */
-            transition: opacity 0.2s;
+            transition: opacity 0.3s ease-in-out;
         }
 
-        .team-card.has-bet .bet-amount-display {
-            opacity: 1; /* Show when a bet is placed */
+        .bet-amount-display.visible {
+            opacity: 1;
         }
 
-        /* Message Area */
-        .message-area {
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 15px;
-            font-size: 1.1em;
-            font-weight: 700;
-            min-height: 40px; /* To prevent layout shift */
+        /* Bet Controls */
+        .bet-controls {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #BFDBFE;
-        }
-
-        /* Bet Amounts Group */
-        .bet-amounts-group, .action-buttons-group {
-            display: flex;
-            flex-wrap: wrap; /* Allow wrapping */
-            justify-content: center;
+            flex-direction: column;
             gap: 15px;
+            width: 100%;
         }
 
-        .bet-amount-button, .action-button {
-            background-color: #3B82F6; /* Blue */
+        .bet-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap; /* Allow wrapping */
+        }
+
+        .bet-input {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 10px 15px;
+            color: #E0E7FF;
+            font-size: 1em;
+            width: 100px; /* Fixed width for input */
+            text-align: center;
+        }
+        .bet-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .bet-button {
+            background-color: #60A5FA; /* Blue */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            flex-grow: 1; /* Allow buttons to grow */
+            max-width: 120px; /* Max width for buttons */
+        }
+        .bet-button:hover {
+            background-color: #3B82F6; /* Darker blue */
+            transform: translateY(-2px);
+        }
+        .bet-button:active {
+            transform: translateY(0);
+        }
+        .bet-button:disabled {
+            background-color: #9CA3AF; /* Gray for disabled */
+            cursor: not-allowed;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .start-button, .reset-button {
+            background-color: #10B981; /* Green */
             color: white;
             padding: 12px 25px;
             border-radius: 12px;
             font-size: 1.1em;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
             transition: background-color 0.2s, transform 0.1s;
-            border: none;
-            outline: none;
-            flex-grow: 1; /* Allow buttons to grow */
-            max-width: 150px; /* Max width for bet buttons */
-            box-sizing: border-box;
+            flex-grow: 1;
+            max-width: 200px;
+        }
+        .reset-button {
+            background-color: #EF4444; /* Red */
         }
 
-        .action-button.large-value-bet {
-            background-color: #F59E0B; /* Orange for special bet */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 10px 20px;
-            max-width: 180px;
-        }
-        .action-button.large-value-bet .bet-label {
-            font-size: 0.9em;
-            opacity: 0.8;
-        }
-        .action-button.large-value-bet .bet-value {
-            font-size: 1.2em;
-            font-weight: 900;
-        }
-
-
-        .bet-amount-button:hover, .action-button:hover {
-            background-color: #2563EB;
+        .start-button:hover {
+            background-color: #059669;
             transform: translateY(-2px);
         }
-
-        .bet-amount-button:disabled, .action-button:disabled {
-            background-color: #6B7280; /* Gray for disabled */
+        .reset-button:hover {
+            background-color: #DC2626;
+            transform: translateY(-2px);
+        }
+        .start-button:active, .reset-button:active {
+            transform: translateY(0);
+        }
+        .start-button:disabled {
+            background-color: #9CA3AF;
             cursor: not-allowed;
-            opacity: 0.7;
-            transform: none;
         }
 
-        .bet-amount-button.active-bet {
-            background-color: #10B981; /* Green for active bet amount */
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
-        }
-
-        /* Bottom Stats and Results */
-        .bottom-stats-and-results {
-            background-color: rgba(255, 255, 255, 0.08);
-            border-radius: 15px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .results-row {
-            display: flex;
-            justify-content: space-around;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .round-result-item {
-            background-color: rgba(0, 0, 0, 0.3);
-            padding: 8px 15px;
+        /* Message Box Styling */
+        .message-box {
+            background-color: rgba(255, 255, 255, 0.15);
             border-radius: 10px;
-            font-size: 0.9em;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .round-result-item.win {
-            color: #4ADE80; /* Green for wins */
-        }
-        .round-result-item.lose {
-            color: #EF4444; /* Red for losses */
-        }
-
-        /* Modal Overlay */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .modal-content {
-            background: linear-gradient(to bottom, #1E3A8A 0%, #172B6B 100%);
-            border-radius: 20px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
-            max-width: 500px;
-            width: 90%;
-            position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .modal-close-button {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: none;
-            border: none;
-            font-size: 2em;
-            color: #E0E7FF;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        .modal-close-button:hover {
-            color: #FF6B6B;
-        }
-
-        .modal-title {
-            font-size: 2.2em;
-            font-weight: 900;
-            margin-bottom: 15px;
+            padding: 15px;
+            margin-top: 20px;
             color: #FFD700; /* Gold */
+            font-weight: bold;
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.5s ease-out;
         }
 
-        .modal-result-message {
-            font-size: 1.4em;
-            margin-bottom: 25px;
-            color: #BFDBFE;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .round-status-display {
-            font-size: 1.1em;
-            font-weight: 700;
-            color: #4ADE80; /* Green for winning */
-            margin-bottom: 15px;
-        }
-        .round-status-display.lose {
-            color: #EF4444; /* Red for losing */
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .game-container {
-                padding: 20px;
-                gap: 20px;
-            }
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
             .top-bar {
                 flex-direction: column;
-                align-items: flex-start;
-                padding-bottom: 15px;
+                align-items: stretch;
             }
             .info-item {
-                width: 100%;
                 justify-content: center;
             }
-            .timer-center {
-                font-size: 3em;
-            }
-            .teams-grid {
-                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-                gap: 15px;
-            }
-            .team-card {
-                padding: 10px;
-                max-width: 120px;
-            }
-            .team-card img {
-                width: 60px;
-                height: 60px;
-            }
-            .bet-amount-button, .action-button {
-                padding: 10px 20px;
-                font-size: 1em;
-                max-width: 130px;
-            }
-            .action-button.large-value-bet {
-                max-width: 150px;
-            }
-            .modal-content {
-                padding: 30px;
-            }
-            .modal-title {
-                font-size: 1.8em;
-            }
-            .modal-result-message {
-                font-size: 1.2em;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .game-container {
-                padding: 15px;
-                gap: 15px;
-            }
-            .teams-grid {
-                grid-template-columns: repeat(2, 1fr); /* Two columns on very small screens */
-            }
-            .bet-amount-button, .action-button {
-                width: 100%;
-                max-width: none;
-            }
-            .bet-amounts-group, .action-buttons-group {
+            .bet-input-group {
                 flex-direction: column;
             }
-            .action-button.large-value-bet {
+            .bet-input, .bet-button {
                 width: 100%;
                 max-width: none;
+            }
+            .action-buttons {
+                flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
     <div class="game-container">
+        <!-- Top Bar - Balance, Multipliers -->
         <div class="top-bar">
             <div class="info-item">
-                <i class="fas fa-coins"></i>
-                <span>الرصيد: <span id="balance-display" class="balance-display">100,000,000</span></span>
+                <i class="fas fa-wallet"></i>
+                <span id="balance">1000</span>
+                <span>$</span>
             </div>
             <div class="info-item">
-                <i class="fas fa-hand-holding-usd"></i>
-                <span>رهاناتي: <span id="my-bets-display" class="my-bets-display">0</span></span>
+                <i class="fas fa-percentage"></i>
+                <span>مضاعف:</span>
+                <span id="current-multiplier">1.95X</span>
             </div>
             <div class="info-item">
-                <i class="fas fa-gavel"></i>
-                <span>الرهان الحالي: <span id="active-bet-display" class="active-bet-display">0</span></span>
+                <i class="fas fa-trophy"></i>
+                <span>الأرباح المحتملة:</span>
+                <span id="potential-win">0</span>
+                <span>$</span>
             </div>
         </div>
 
+        <!-- Main Game Area - Timer and Teams -->
         <div class="main-game-area">
-            <div id="timer-display" class="timer-center">10</div>
-            <span class="remaining-text">ثواني متبقية</span>
+            <div id="timer-display" class="timer-center">00</div>
+            <div class="remaining-text">ثوانٍ متبقية للرهان</div>
 
-            <div id="teams-grid" class="teams-grid">
-                </div>
+            <div class="teams-grid" id="teams-grid">
+                <!-- Team Cards will be inserted here by JavaScript -->
+            </div>
         </div>
 
-        <div class="message-area" id="message-area">
-            الرجاء اختيار مبلغ الرهان وفريقك المفضل!
+        <!-- Bet Controls -->
+        <div class="bet-controls">
+            <div class="bet-input-group">
+                <input type="number" id="bet-amount" class="bet-input" placeholder="أدخل مبلغ الرهان" min="1">
+                <button class="bet-button" id="bet-50">+50</button>
+                <button class="bet-button" id="bet-100">+100</button>
+                <button class="bet-button" id="bet-max">الحد الأقصى</button>
+            </div>
+            <div class="action-buttons">
+                <button class="start-button" id="start-game-button">بدء الجولة</button>
+                <button class="reset-button" id="reset-game-button">إعادة تعيين اللعبة</button>
+            </div>
         </div>
 
-        <div class="bet-amounts-group">
-            <button class="bet-amount-button" data-bet="1000">1K</button>
-            <button class="bet-amount-button" data-bet="10000">10K</button>
-            <button class="bet-amount-button" data-bet="100000">100K</button>
-            <button class="bet-amount-button" data-bet="1000000">1M</button>
-            <button class="bet-amount-button" data-bet="5000000">5M</button>
-            <button class="bet-amount-button" data-bet="10000000">10M</button>
-        </div>
-
-        <div class="action-buttons-group">
-            <button id="start-round-button" class="action-button">بدء الجولة</button>
-            <button id="cash-out-button" class="action-button">سحب الرصيد</button>
-            <button id="replay-last-bet-button" class="action-button">إعادة الرهان الأخير</button>
-            <button class="action-button large-value-bet" data-bet="100000000">
-                <span class="bet-label">رهان كبير</span>
-                <span class="bet-value">100M</span>
-            </button>
-        </div>
-
-        <div class="bottom-stats-and-results">
-            <h3>نتائج الجولات السابقة:</h3>
-            <div id="previous-results" class="results-row">
-                </div>
-        </div>
-
-        <div id="modal-overlay" class="modal-overlay">
-            <div id="modal-content" class="modal-content">
-                <button class="modal-close-button" id="modal-close-button">&times;</button>
-                <h2 id="modal-title" class="modal-title"></h2>
-                <p id="modal-result-message" class="modal-result-message"></p>
-                <p id="round-status-display" class="round-status-display"></p>
-                </div>
-        </div>
-
+        <!-- Message Box -->
+        <div id="message-box" class="message-box"></div>
     </div>
 
     <script>
-        // Start of your provided JavaScript code
-        const balanceDisplay = document.getElementById('balance-display');
-        const myBetsDisplay = document.getElementById('my-bets-display');
-        const activeBetDisplay = document.getElementById('active-bet-display');
+        // Game State Variables
+        let balance = 1000;
+        let betAmount = 0;
+        let selectedTeam = null;
+        let timer = 10; // Initial timer value
+        let countdownInterval;
+        let gameStarted = false;
+        let teams = [
+            { id: 'teamA', name: 'الفريق أ', image: 'https://placehold.co/70x70/2563EB/ffffff?text=A' },
+            { id: 'teamB', name: 'الفريق ب', image: 'https://placehold.co/70x70/DC2626/ffffff?text=B' },
+            { id: 'teamC', name: 'الفريق ج', image: 'https://placehold.co/70x70/10B981/ffffff?text=C' },
+            { id: 'teamD', name: 'الفريق د', image: 'https://placehold.co/70x70/F59E0B/ffffff?text=D' }
+        ];
+
+        // DOM Elements
+        const balanceDisplay = document.getElementById('balance');
+        const potentialWinDisplay = document.getElementById('potential-win');
         const timerDisplay = document.getElementById('timer-display');
+        const betAmountInput = document.getElementById('bet-amount');
         const teamsGrid = document.getElementById('teams-grid');
-        const messageArea = document.getElementById('message-area');
-        const betAmountButtons = document.querySelectorAll('.bet-amount-button');
-        const startRoundButton = document.getElementById('start-round-button');
-        const cashOutButton = document.getElementById('cash-out-button');
-        const replayLastBetButton = document.getElementById('replay-last-bet-button');
-        const previousResultsContainer = document.getElementById('previous-results');
+        const startGameButton = document.getElementById('start-game-button');
+        const resetGameButton = document.getElementById('reset-game-button');
+        const messageBox = document.getElementById('message-box');
 
-        // Modal elements
-        const modalOverlay = document.getElementById('modal-overlay');
-        const modalCloseButton = document.getElementById('modal-close-button');
-        const modalTitle = document.getElementById('modal-title');
-        const modalResultMessage = document.getElementById('modal-result-message');
-        const roundStatusDisplay = document.getElementById('round-status-display');
-
-        let currentBalance = 100000000; // 100 million
-        let activeBetAmount = 0;
-        let betsPlacedThisRound = {}; // {teamId: betAmount}
-        let lastRoundBets = {}; // To store bets for replay
-        let roundInProgress = false;
-        let timer;
-        let timeLeft = 10;
-        const totalTeams = 8;
-        const baseOdds = 2.5; // Base odds for all teams
-
-        // Array of team objects (you can customize these with actual team names and image paths)
-        // Ensure you have an 'images' folder in your GitHub repo with these files
-        const teams = Array.from({ length: totalTeams }, (_, i) => ({
-            id: i + 1,
-            name: `فريق ${i + 1}`,
-            // IMPORTANT: Update these image paths if your images are in a different location
-            image: `images/team${i + 1}.png`,
-            odds: baseOdds
-        }));
-
-        // --- Utility Functions ---
-
-        function formatCurrency(amount) {
-            if (amount >= 1000000) {
-                return (amount / 1000000).toFixed(0) + 'M';
-            } else if (amount >= 1000) {
-                return (amount / 1000).toFixed(0) + 'K';
+        // Initial Setup
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                console.log('DOMContentLoaded: Initializing game...');
+                updateBalanceDisplay();
+                renderTeams();
+                updateBetControls();
+                console.log('DOMContentLoaded: Game initialized successfully.');
+            } catch (error) {
+                console.error('DOMContentLoaded Error:', error);
+                showMessage('حدث خطأ أثناء تهيئة اللعبة: ' + error.message, 'error');
             }
-            return amount.toLocaleString();
-        }
+        });
 
+        // Function to update balance display
         function updateBalanceDisplay() {
-            balanceDisplay.textContent = formatCurrency(currentBalance);
+            balanceDisplay.textContent = balance.toFixed(2); // Display with 2 decimal places
+            console.log('Balance updated to:', balance);
         }
 
-        function updateMyBetsDisplay() {
-            const totalMyBets = Object.values(betsPlacedThisRound).reduce((sum, bet) => sum + bet, 0);
-            myBetsDisplay.textContent = formatCurrency(totalMyBets);
+        // Function to update potential win display
+        function updatePotentialWin() {
+            const multiplier = parseFloat(document.getElementById('current-multiplier').textContent);
+            potentialWinDisplay.textContent = (betAmount * multiplier).toFixed(2);
+            console.log('Potential Win updated to:', potentialWinDisplay.textContent);
         }
 
-        function updateActiveBetDisplay() {
-            activeBetDisplay.textContent = formatCurrency(activeBetAmount);
+        // Function to render team cards dynamically
+        function renderTeams() {
+            teamsGrid.innerHTML = ''; // Clear existing cards
+            teams.forEach(team => {
+                const teamCard = document.createElement('div');
+                teamCard.classList.add('team-card');
+                teamCard.id = team.id;
+                teamCard.innerHTML = `
+                    <img src="${team.image}" alt="Team ${team.name}">
+                    <span>${team.name}</span>
+                    <div class="multiplier">1.95X</div>
+                    <div class="bet-amount-display" id="bet-display-${team.id}">$0</div>
+                `;
+                teamCard.addEventListener('click', () => selectTeam(team.id));
+                teamsGrid.appendChild(teamCard);
+            });
+            console.log('Teams rendered successfully.');
         }
 
-        function showMessage(msg, type = 'info', duration = 3000) {
-            messageArea.textContent = msg;
-            messageArea.className = 'message-area'; // Reset classes
-            if (type === 'error') {
-                messageArea.classList.add('bg-red-700', 'text-white');
-            } else if (type === 'success') {
-                messageArea.classList.add('bg-green-700', 'text-white');
-            } else {
-                messageArea.classList.add('bg-blue-700', 'text-white'); // Default info
+        // Function to select a team
+        function selectTeam(teamId) {
+            console.log('Attempting to select team:', teamId);
+            if (gameStarted) {
+                showMessage('لا يمكنك تغيير الفريق بعد بدء الجولة.', 'error');
+                console.warn('Attempted to change team while game started.');
+                return;
             }
-            setTimeout(() => {
-                messageArea.textContent = 'الرجاء اختيار مبلغ الرهان وفريقك المفضل!';
-                messageArea.className = 'message-area'; // Reset to default styling
-            }, duration);
+            // Remove 'selected' class from all teams
+            document.querySelectorAll('.team-card').forEach(card => {
+                card.classList.remove('selected');
+                card.querySelector(`.bet-amount-display`).classList.remove('visible'); // Hide all bet displays
+            });
+
+            // Add 'selected' class to the clicked team
+            const selected = document.getElementById(teamId);
+            if (selected) {
+                selected.classList.add('selected');
+                selectedTeam = teamId;
+                updateBetControls(); // Re-enable/disable bet buttons based on selection
+                if (betAmount > 0) {
+                    selected.querySelector(`.bet-amount-display`).classList.add('visible');
+                }
+                showMessage(`لقد اخترت ${teams.find(t => t.id === teamId).name}.`);
+                console.log('Team selected:', selectedTeam);
+            } else {
+                console.error('Selected team element not found for ID:', teamId);
+            }
         }
 
-        function updateButtonStates() {
-            startRoundButton.disabled = Object.keys(betsPlacedThisRound).length ===
+        // Function to add bet amount
+        function addBet(amount) {
+            console.log('Attempting to add bet:', amount);
+            if (gameStarted) {
+                showMessage('لا يمكنك إضافة رهان بعد بدء الجولة.', 'error');
+                console.warn('Attempted to add bet while game started.');
+                return;
+            }
+            if (!selectedTeam) {
+                showMessage('يرجى اختيار فريق أولاً.', 'error');
+                console.warn('Attempted to add bet without selecting a team.');
+                return;
+            }
+
+            const newBet = betAmount + amount;
+            if (newBet > balance) {
+                showMessage('ليس لديك رصيد كافٍ لهذا الرهان.', 'error');
+                console.warn('Insufficient balance to add bet. Current balance:', balance, 'New bet:', newBet);
+                return;
+            }
+            betAmount = newBet;
+            betAmountInput.value = betAmount;
+            updateBetDisplay();
+            updatePotentialWin();
+            showMessage(`تم إضافة ${amount}$ إلى رهانك.`);
+            console.log('Bet amount updated to:', betAmount);
+        }
+
+        // Function to set bet to max available balance
+        function setMaxBet() {
+            console.log('Attempting to set max bet.');
+            if (gameStarted) {
+                showMessage('لا يمكنك إضافة رهان بعد بدء الجولة.', 'error');
+                console.warn('Attempted to set max bet while game started.');
+                return;
+            }
+            if (!selectedTeam) {
+                showMessage('يرجى اختيار فريق أولاً.', 'error');
+                console.warn('Attempted to set max bet without selecting a team.');
+                return;
+            }
+            betAmount = balance;
+            betAmountInput.value = betAmount;
+            updateBetDisplay();
+            updatePotentialWin();
+            showMessage('تم تعيين الرهان على الحد الأقصى لرصيدك.');
+            console.log('Bet amount set to max:', betAmount);
+        }
+
+        // Update bet display on the card
+        function updateBetDisplay() {
+            teams.forEach(team => {
+                const betDisplay = document.getElementById(`bet-display-${team.id}`);
+                if (betDisplay) {
+                    if (team.id === selectedTeam) {
+                        betDisplay.textContent = `$${betAmount}`;
+                        betDisplay.classList.add('visible');
+                    } else {
+                        betDisplay.classList.remove('visible');
+                    }
+                }
+            });
+            console.log('Bet display updated for selected team.');
+        }
+
+        // Handle bet amount input changes
+        betAmountInput.addEventListener('input', (e) => {
+            console.log('Bet input changed:', e.target.value);
+            let value = parseInt(e.target.value);
+            if (isNaN(value) || value < 0) {
+                value = 0;
+            }
+            if (value > balance) {
+                value = balance; // Cap at balance
+                showMessage('لا يمكنك المراهنة بأكثر من رصيدك الحالي.', 'error');
+                console.warn('Bet amount capped at balance.');
+            }
+            betAmount = value;
+            e.target.value = betAmount; // Update input to capped value
+            updateBetDisplay();
+            updatePotentialWin();
+            console.log('Bet amount from input:', betAmount);
+        });
+
+        // Add event listeners for bet buttons
+        document.getElementById('bet-50').addEvent
