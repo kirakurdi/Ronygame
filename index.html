@@ -3,449 +3,287 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة تخمين الفرق - تصميم بسيط</title>
-    <!-- Tailwind CSS CDN for styling -->
+    <title>لعبة تخمين الفرق - تصميم جديد</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-    <!-- No Font Awesome or other external media links in this version -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(to bottom, #1E3A8A 0%, #172B6B 100%); /* Dark blue gradient */
+            background: linear-gradient(to bottom, #1E3A8A 0%, #172B6B 100%); /* Dark blue gradient from image */
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 10px;
+            color: #E0E7FF; /* Light blue/white text */
+            overflow-x: hidden;
+            padding: 20px; /* Add some padding for smaller screens */
             box-sizing: border-box;
-            overflow-y: auto;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
+        /* General Container Styling */
         .game-container {
-            background-color: #172B6B;
-            border-radius: 2rem;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-            padding: 2rem;
-            max-width: 900px;
-            width: 100%;
+            background-color: rgba(255, 255, 255, 0.05); /* Slightly transparent white for a frosted look */
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             text-align: center;
-            border: 3px solid #3B82F6;
-            position: relative;
-            color: #E0F2F7;
+            max-width: 900px; /* Max width for larger screens */
+            width: 100%; /* Full width on smaller screens */
+            backdrop-filter: blur(10px); /* Frosted glass effect */
+            -webkit-backdrop-filter: blur(10px); /* For Safari */
+            border: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             flex-direction: column;
-            gap: 1.8rem;
+            gap: 25px; /* Spacing between main sections */
         }
 
-        h1 {
-            color: #FACC15;
-            font-size: 2.8rem;
-            margin-bottom: 0.8rem;
-            text-shadow: 0 3px 6px rgba(0,0,0,0.4);
-            font-weight: 900;
-        }
-        p.description {
-            color: #9CA3AF;
-            font-size: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        /* Top Bar Section */
+        /* Top Bar - Balance, Multipliers, etc. */
         .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: linear-gradient(to right, #3B82F6, #60A5FA);
-            padding: 0.8rem 1.2rem;
-            border-radius: 1rem;
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.3);
-            border: 2px solid #60A5FA;
-            flex-wrap: wrap;
-            gap: 0.8rem;
-        }
-        .top-bar .info-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #D1D5DB;
-        }
-        .top-bar .info-item .icon { /* Changed from i to .icon for consistency as Font Awesome is removed */
-            color: #FACC15;
-            width: 1.25rem; /* Placeholder size for icon */
-            height: 1.25rem;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .top-bar .balance-display {
-            font-size: 1.3rem;
-            font-weight: 800;
-            color: #34D399;
-            background-color: #2D3748;
-            padding: 0.4rem 1rem;
-            border-radius: 0.8rem;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
-            border: 1px solid #34D399;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            gap: 15px; /* Spacing between items */
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Main Game Area */
+        .info-item {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1em;
+            font-weight: 700;
+        }
+        .info-item i {
+            color: #FFD700; /* Gold color for icons */
+        }
+
+        /* Main Game Area - Timer and Teams */
         .main-game-area {
             display: flex;
             flex-direction: column;
             align-items: center;
-            position: relative;
+            gap: 20px;
         }
+
         .timer-center {
-            font-size: 4rem;
+            font-size: 4em;
             font-weight: 900;
-            color: #FACC15;
-            text-shadow: 0 0 15px #FACC15, 0 0 30px #FACC15;
-            margin-bottom: 1.5rem;
-            background-color: #2D3748;
-            padding: 1rem 2rem;
-            border-radius: 1.5rem;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-            min-width: 150px;
-            border: 3px solid #FACC15;
-            position: relative;
-            z-index: 10;
+            color: #4ADE80; /* Green for active timer */
+            animation: pulse 1.5s infinite alternate; /* Simple pulse effect */
         }
         .remaining-text {
-            position: absolute;
-            top: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 1rem;
-            color: #D1D5DB;
-            background-color: #2D3748;
-            padding: 0.3rem 0.8rem;
-            border-radius: 0.8rem;
-            white-space: nowrap;
-            z-index: 1;
-            border: 1px solid #4A5568;
+            font-size: 1em;
+            color: #BFDBFE; /* Light blue text */
         }
 
+        @keyframes pulse {
+            from { transform: scale(1); opacity: 1; }
+            to { transform: scale(1.05); opacity: 0.9; }
+        }
 
+        /* Teams Grid */
         .teams-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 1.2rem;
-            margin-bottom: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Responsive grid */
+            gap: 20px;
             width: 100%;
+            justify-items: center;
         }
+
         .team-card {
-            background: linear-gradient(to bottom, #2D3748, #1A202C);
-            border: 3px solid #4A5568;
-            border-radius: 1.5rem;
-            padding: 1rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 10px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-            position: relative;
-            overflow: hidden;
-            transform: translateZ(0);
+            transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
+            position: relative; /* For bet amount display */
+            width: 100%; /* Ensure cards fill grid cells */
+            max-width: 150px; /* Max width for individual card */
+            box-sizing: border-box; /* Include padding in width */
         }
-        .team-card:hover:not(.selected):not(.disabled):not(.has-bet) {
-            transform: scale(1.07) translateY(-5px);
-            border-color: #FACC15;
-            box-shadow: 0 10px 20px rgba(250, 204, 21, 0.4);
+
+        .team-card:hover {
+            transform: translateY(-5px);
+            background-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
         }
+
         .team-card.selected {
-            border-color: #34D399;
-            box-shadow: 0 0 0 5px rgba(52, 211, 153, 0.6);
-            transform: scale(1.07);
+            border: 3px solid #60A5FA; /* Blue border for selected */
+            box-shadow: 0 0 15px rgba(96, 165, 250, 0.7);
         }
-        .team-card.winning {
-            border-color: #10B981;
-            background: linear-gradient(to bottom, #10B981, #065F46);
-            box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.8);
-            animation: pulse-win 1s infinite alternate;
+        .team-card.revealed-winning {
+            background-color: #16A34A; /* Green for winning team */
+            color: white;
         }
-        .team-card.losing {
-            border-color: #EF4444;
-            background: linear-gradient(to bottom, #EF4444, #B91C1C);
-            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.6);
-            animation: shake 0.5s;
+        .team-card.revealed-losing {
+            background-color: #DC2626; /* Red for losing team */
+            color: white;
         }
-        .team-card.disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            filter: grayscale(50%);
-        }
-        .team-card.has-bet {
-            border-color: #60A5FA;
-            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.6);
-            cursor: default;
-            opacity: 0.95;
-        }
-        .team-card .team-logo-placeholder { /* New style for text-based logos */
-            width: 90px;
-            height: 90px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #4A5568; /* Greyish background for logo */
+
+        .team-card img {
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
-            margin-bottom: 0.6rem;
-            border: 3px solid #FACC15;
-            box-shadow: 0 0 8px rgba(250, 204, 21, 0.6);
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: #E0F2F7;
+            object-fit: cover;
+            border: 2px solid rgba(255, 255, 255, 0.3);
         }
+
         .team-card span {
             font-weight: 700;
-            color: #E0F2F7;
-            font-size: 1rem;
-            margin-top: 0.3rem;
-            white-space: nowrap;
         }
-        .team-card .multiplier {
-            font-size: 0.85rem;
-            color: #FACC15;
-            font-weight: bold;
-            background-color: rgba(0,0,0,0.4);
-            padding: 3px 10px;
-            border-radius: 0.6rem;
-            margin-top: 0.3rem;
-            border: 1px solid rgba(250, 204, 21, 0.5);
+
+        .multiplier {
+            background-color: rgba(0, 0, 0, 0.4);
+            padding: 5px 10px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            color: #FFD700; /* Gold color */
         }
-        .team-card .bet-amount-display {
+
+        .bet-amount-display {
             position: absolute;
-            top: 8px;
-            right: 8px;
-            background-color: #FACC15;
-            color: #1A202C;
-            padding: 3px 10px;
-            border-radius: 0.6rem;
-            font-size: 0.9rem;
-            font-weight: bold;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
-            border: 1px solid #EAB308;
-        }
-        .team-card.has-bet .bet-amount-display {
-            opacity: 1;
-        }
-
-        .team-card.selection-highlight {
-            border-color: #FACC15;
-            box-shadow: 0 0 15px rgba(250, 204, 21, 0.7), 0 0 30px rgba(250, 204, 21, 0.5);
-            transform: scale(1.05);
-        }
-
-
-        .message-area {
-            min-height: 3.5rem;
-            font-size: 1.4rem;
-            font-weight: 800;
-            margin-top: 1.5rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #FACC15;
-            background-color: #2D3748;
-            padding: 1rem;
-            border-radius: 1rem;
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.3);
-            border: 2px solid #4A5568;
-        }
-        .message-area.win { color: #34D399; }
-        .message-area.lose { color: #EF4444; }
-        .message-area.thinking { color: #FACC15; }
-        .message-area.error { color: #EF4444; }
-        .message-area.info { color: #9CA3AF; }
-
-
-        .bet-amounts-group {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 1.5rem;
-            padding: 1rem 1.5rem;
-            background: linear-gradient(to right, #3B82F6, #60A5FA);
-            border-radius: 1rem;
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.3);
-            border: 2px solid #60A5FA;
-        }
-        .bet-amount-button {
-            background-image: linear-gradient(to right, #DC2626, #EF4444);
+            bottom: -10px; /* Position below the card */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #60A5FA; /* Blue background for bet amount */
             color: white;
-            padding: 0.6rem 1.2rem;
-            border-radius: 0.8rem;
-            font-size: 0.95rem;
-            font-weight: 800;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            min-width: 60px;
-        }
-        .bet-amount-button:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-            background-image: linear-gradient(to right, #EF4444, #F87171);
-        }
-        .bet-amount-button:active:not(:disabled) {
-            transform: translateY(0);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-        .bet-amount-button:disabled {
-            background-image: linear-gradient(to right, #9CA3AF, #D1D5DB);
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-        .bet-amount-button.active-bet-amount {
-            border: 2px solid #FACC15;
-            box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.5);
-            transform: scale(1.05);
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.8em;
+            font-weight: bold;
+            white-space: nowrap; /* Prevent wrapping */
+            opacity: 0; /* Hidden by default */
+            transition: opacity 0.2s;
         }
 
+        .team-card.has-bet .bet-amount-display {
+            opacity: 1; /* Show when a bet is placed */
+        }
 
-        .action-buttons-group {
+        /* Message Area */
+        .message-area {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 1.1em;
+            font-weight: 700;
+            min-height: 40px; /* To prevent layout shift */
             display: flex;
             justify-content: center;
-            gap: 1.2rem;
-            margin-bottom: 1.5rem;
+            align-items: center;
+            color: #BFDBFE;
         }
-        .action-button {
-            background-image: linear-gradient(to right, #FACC15, #FDE047);
-            color: #1F2937;
-            padding: 0.7rem 1.6rem;
-            border-radius: 0.8rem;
-            font-size: 1rem;
-            font-weight: 800;
+
+        /* Bet Amounts Group */
+        .bet-amounts-group, .action-buttons-group {
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping */
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .bet-amount-button, .action-button {
+            background-color: #3B82F6; /* Blue */
+            color: white;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: bold;
             cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
             border: none;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            outline: none;
+            flex-grow: 1; /* Allow buttons to grow */
+            max-width: 150px; /* Max width for bet buttons */
+            box-sizing: border-box;
         }
+
         .action-button.large-value-bet {
-            background-image: linear-gradient(to right, #34D399, #6EE7B7);
-            color: #1F2937;
-            padding: 0.7rem 1rem;
-            min-width: 120px;
+            background-color: #F59E0B; /* Orange for special bet */
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            line-height: 1.2;
-            gap: 0.2rem;
+            justify-content: center;
+            padding: 10px 20px;
+            max-width: 180px;
         }
         .action-button.large-value-bet .bet-label {
-            font-size: 0.75rem;
-            font-weight: 600;
+            font-size: 0.9em;
+            opacity: 0.8;
         }
         .action-button.large-value-bet .bet-value {
-            font-size: 1.1rem;
+            font-size: 1.2em;
             font-weight: 900;
         }
 
 
-        .action-button:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        .bet-amount-button:hover, .action-button:hover {
+            background-color: #2563EB;
+            transform: translateY(-2px);
         }
-        .action-button:active:not(:disabled) {
-            transform: translateY(0);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-        .action-button:disabled {
-            background-image: linear-gradient(to right, #A1A1AA, #D4D4D8);
+
+        .bet-amount-button:disabled, .action-button:disabled {
+            background-color: #6B7280; /* Gray for disabled */
             cursor: not-allowed;
-            opacity: 0.6;
+            opacity: 0.7;
+            transform: none;
         }
 
+        .bet-amount-button.active-bet {
+            background-color: #10B981; /* Green for active bet amount */
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
 
+        /* Bottom Stats and Results */
         .bottom-stats-and-results {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 1.2rem;
-            margin-top: 1.8rem;
-            padding: 1.5rem;
-            background: linear-gradient(to right, #3B82F6, #60A5FA);
-            border-radius: 1.5rem;
-            box-shadow: inset 0 3px 6px rgba(0,0,0,0.3);
-            border: 2px solid #60A5FA;
-        }
-        .bottom-stats-and-results .stat-block {
+            background-color: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 0.6rem;
+            gap: 15px;
+            margin-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .bottom-stats-and-results .stat-label {
-            font-size: 0.95rem;
-            color: #D1D5DB;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-        .bottom-stats-and-results .stat-value {
-            font-size: 1.4rem;
-            font-weight: 900;
-            color: #FACC15;
-        }
-        .bottom-stats-and-results .results-bar {
-            grid-column: 1 / -1;
+
+        .results-row {
             display: flex;
-            justify-content: center;
-            align-items: center;
+            justify-content: space-around;
+            gap: 10px;
             flex-wrap: wrap;
-            gap: 0.6rem;
-            margin-top: 1.2rem;
-            padding-top: 0.8rem;
-            border-top: 2px dashed #60A5FA;
         }
-        .bottom-stats-and-results .results-bar .result-logo-placeholder { /* New style for text-based winner logos */
-            width: 45px;
-            height: 45px;
+
+        .round-result-item {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            font-weight: bold;
             display: flex;
-            justify-content: center;
             align-items: center;
-            background-color: #4A5568;
-            border-radius: 50%;
-            border: 2px solid #FACC15;
-            box-shadow: 0 0 5px rgba(250, 204, 21, 0.5);
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #E0F2F7;
-        }
-        .bottom-stats-and-results .results-bar .result-label {
-            font-size: 1rem;
-            color: #D1D5DB;
-            font-weight: 700;
-            width: 100%;
-            margin-bottom: 0.6rem;
+            gap: 5px;
         }
 
-
-        /* Keyframes for animations */
-        @keyframes pulse-win {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.05); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
+        .round-result-item.win {
+            color: #4ADE80; /* Green for wins */
+        }
+        .round-result-item.lose {
+            color: #EF4444; /* Red for losses */
         }
 
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-            100% { transform: translateX(0); }
-        }
-
-        /* Modal Styles */
+        /* Modal Overlay */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -453,7 +291,7 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.7);
-            display: none;
+            display: flex;
             justify-content: center;
             align-items: center;
             z-index: 1000;
@@ -461,154 +299,278 @@
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
+
         .modal-overlay.active {
-            display: flex;
             opacity: 1;
             visibility: visible;
         }
 
         .modal-content {
-            background-color: #1A202C;
-            border-radius: 1.5rem;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
-            padding: 1.5rem;
-            max-width: 600px;
-            width: 90%;
+            background: linear-gradient(to bottom, #1E3A8A 0%, #172B6B 100%);
+            border-radius: 20px;
+            padding: 40px;
             text-align: center;
-            border: 1px solid #4A5568;
-            color: #E0F2F7;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+            max-width: 500px;
+            width: 90%;
             position: relative;
-            transform: translateY(-50px);
-            transition: transform 0.3s ease;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        .modal-overlay.active .modal-content {
-            transform: translateY(0);
-        }
-
-        .modal-content.results-modal {
-            background: linear-gradient(to bottom, #34D399 0%, #10B981 100%);
-            border: 2px solid #065F46;
-            color: white;
-            padding: 2.5rem 1.5rem;
-        }
-        .modal-content.results-modal.lose {
-            background: linear-gradient(to bottom, #EF4444 0%, #B91C1C 100%);
-            border: 2px solid #991B1B;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .modal-close-button {
             position: absolute;
-            top: 10px;
+            top: 15px;
             right: 15px;
             background: none;
             border: none;
-            font-size: 1.5rem;
-            color: #FACC15;
+            font-size: 2em;
+            color: #E0E7FF;
             cursor: pointer;
-            transition: color 0.2s ease;
+            transition: color 0.2s;
         }
         .modal-close-button:hover {
-            color: #FDE047;
-        }
-        .modal-content.results-modal .modal-close-button {
-            color: white;
+            color: #FF6B6B;
         }
 
         .modal-title {
-            color: #FACC15;
-            font-size: 1.8rem;
+            font-size: 2.2em;
             font-weight: 900;
-            margin-bottom: 1.5rem;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        .modal-content.results-modal .modal-title {
-            color: white;
-            font-size: 2.2rem;
-            text-shadow: 0 0 10px rgba(255,255,255,0.5);
-            margin-bottom: 1rem;
+            margin-bottom: 15px;
+            color: #FFD700; /* Gold */
         }
 
         .modal-result-message {
-            font-size: 1.6rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: white;
-        }
-        .modal-content.results-modal .round-status-display {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: rgba(255,255,255,0.8);
-        }
-        .modal-content.results-modal .result-detail {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: rgba(0,0,0,0.2);
-            padding: 0.75rem 1rem;
-            border-radius: 0.75rem;
-            margin-bottom: 0.75rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-        .modal-content.results-modal .result-detail span:last-child {
-            font-weight: 900;
-            color: #FACC15;
+            font-size: 1.4em;
+            margin-bottom: 25px;
+            color: #BFDBFE;
         }
 
-        .modal-section {
-            background-color: #2D3748;
-            border-radius: 1rem;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            border: 1px solid #4A5568;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); 
-        }
-        .modal-content.results-modal .modal-section {
-             background-color: rgba(0,0,0,0.3);
-             border-color: rgba(255,255,255,0.3);
-             box-shadow: none;
-             margin-top: 1.5rem;
-        }
-        .modal-section-title {
-            color: #D1D5DB;
-            font-size: 1.1rem;
+        .round-status-display {
+            font-size: 1.1em;
             font-weight: 700;
-            margin-bottom: 0.75rem;
+            color: #4ADE80; /* Green for winning */
+            margin-bottom: 15px;
         }
-        .modal-content.results-modal .modal-section-title {
-            color: white;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        .round-status-display.lose {
+            color: #EF4444; /* Red for losing */
         }
 
-        .man-of-the-match-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 1rem;
-            justify-content: center;
-            align-items: flex-start;
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 20px;
+                gap: 20px;
+            }
+            .top-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                padding-bottom: 15px;
+            }
+            .info-item {
+                width: 100%;
+                justify-content: center;
+            }
+            .timer-center {
+                font-size: 3em;
+            }
+            .teams-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 15px;
+            }
+            .team-card {
+                padding: 10px;
+                max-width: 120px;
+            }
+            .team-card img {
+                width: 60px;
+                height: 60px;
+            }
+            .bet-amount-button, .action-button {
+                padding: 10px 20px;
+                font-size: 1em;
+                max-width: 130px;
+            }
+            .action-button.large-value-bet {
+                max-width: 150px;
+            }
+            .modal-content {
+                padding: 30px;
+            }
+            .modal-title {
+                font-size: 1.8em;
+            }
+            .modal-result-message {
+                font-size: 1.2em;
+            }
         }
-        .player-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-            background-color: #1A202C;
-            border-radius: 0.75rem;
-            padding: 0.75rem;
-            border: 1px solid #4A5568;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 15px;
+                gap: 15px;
+            }
+            .teams-grid {
+                grid-template-columns: repeat(2, 1fr); /* Two columns on very small screens */
+            }
+            .bet-amount-button, .action-button {
+                width: 100%;
+                max-width: none;
+            }
+            .bet-amounts-group, .action-buttons-group {
+                flex-direction: column;
+            }
+            .action-button.large-value-bet {
+                width: 100%;
+                max-width: none;
+            }
         }
-        .modal-content.results-modal .player-card {
-            background-color: rgba(255,255,255,0.1);
-            border-color: rgba(255,255,255,0.3);
-            color: white;
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="top-bar">
+            <div class="info-item">
+                <i class="fas fa-coins"></i>
+                <span>الرصيد: <span id="balance-display" class="balance-display">100,000,000</span></span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-hand-holding-usd"></i>
+                <span>رهاناتي: <span id="my-bets-display" class="my-bets-display">0</span></span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-gavel"></i>
+                <span>الرهان الحالي: <span id="active-bet-display" class="active-bet-display">0</span></span>
+            </div>
+        </div>
+
+        <div class="main-game-area">
+            <div id="timer-display" class="timer-center">10</div>
+            <span class="remaining-text">ثواني متبقية</span>
+
+            <div id="teams-grid" class="teams-grid">
+                </div>
+        </div>
+
+        <div class="message-area" id="message-area">
+            الرجاء اختيار مبلغ الرهان وفريقك المفضل!
+        </div>
+
+        <div class="bet-amounts-group">
+            <button class="bet-amount-button" data-bet="1000">1K</button>
+            <button class="bet-amount-button" data-bet="10000">10K</button>
+            <button class="bet-amount-button" data-bet="100000">100K</button>
+            <button class="bet-amount-button" data-bet="1000000">1M</button>
+            <button class="bet-amount-button" data-bet="5000000">5M</button>
+            <button class="bet-amount-button" data-bet="10000000">10M</button>
+        </div>
+
+        <div class="action-buttons-group">
+            <button id="start-round-button" class="action-button">بدء الجولة</button>
+            <button id="cash-out-button" class="action-button">سحب الرصيد</button>
+            <button id="replay-last-bet-button" class="action-button">إعادة الرهان الأخير</button>
+            <button class="action-button large-value-bet" data-bet="100000000">
+                <span class="bet-label">رهان كبير</span>
+                <span class="bet-value">100M</span>
+            </button>
+        </div>
+
+        <div class="bottom-stats-and-results">
+            <h3>نتائج الجولات السابقة:</h3>
+            <div id="previous-results" class="results-row">
+                </div>
+        </div>
+
+        <div id="modal-overlay" class="modal-overlay">
+            <div id="modal-content" class="modal-content">
+                <button class="modal-close-button" id="modal-close-button">&times;</button>
+                <h2 id="modal-title" class="modal-title"></h2>
+                <p id="modal-result-message" class="modal-result-message"></p>
+                <p id="round-status-display" class="round-status-display"></p>
+                </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Start of your provided JavaScript code
+        const balanceDisplay = document.getElementById('balance-display');
+        const myBetsDisplay = document.getElementById('my-bets-display');
+        const activeBetDisplay = document.getElementById('active-bet-display');
+        const timerDisplay = document.getElementById('timer-display');
+        const teamsGrid = document.getElementById('teams-grid');
+        const messageArea = document.getElementById('message-area');
+        const betAmountButtons = document.querySelectorAll('.bet-amount-button');
+        const startRoundButton = document.getElementById('start-round-button');
+        const cashOutButton = document.getElementById('cash-out-button');
+        const replayLastBetButton = document.getElementById('replay-last-bet-button');
+        const previousResultsContainer = document.getElementById('previous-results');
+
+        // Modal elements
+        const modalOverlay = document.getElementById('modal-overlay');
+        const modalCloseButton = document.getElementById('modal-close-button');
+        const modalTitle = document.getElementById('modal-title');
+        const modalResultMessage = document.getElementById('modal-result-message');
+        const roundStatusDisplay = document.getElementById('round-status-display');
+
+        let currentBalance = 100000000; // 100 million
+        let activeBetAmount = 0;
+        let betsPlacedThisRound = {}; // {teamId: betAmount}
+        let lastRoundBets = {}; // To store bets for replay
+        let roundInProgress = false;
+        let timer;
+        let timeLeft = 10;
+        const totalTeams = 8;
+        const baseOdds = 2.5; // Base odds for all teams
+
+        // Array of team objects (you can customize these with actual team names and image paths)
+        // Ensure you have an 'images' folder in your GitHub repo with these files
+        const teams = Array.from({ length: totalTeams }, (_, i) => ({
+            id: i + 1,
+            name: `فريق ${i + 1}`,
+            // IMPORTANT: Update these image paths if your images are in a different location
+            image: `images/team${i + 1}.png`,
+            odds: baseOdds
+        }));
+
+        // --- Utility Functions ---
+
+        function formatCurrency(amount) {
+            if (amount >= 1000000) {
+                return (amount / 1000000).toFixed(0) + 'M';
+            } else if (amount >= 1000) {
+                return (amount / 1000).toFixed(0) + 'K';
+            }
+            return amount.toLocaleString();
         }
-        .player-card.top1 {
-            background: linear-gradient(to top, #FACC15, #FDE047);
-            color: #1A202C;
-            border-color: #FFD700;
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(250, 204, 21, 0.
+
+        function updateBalanceDisplay() {
+            balanceDisplay.textContent = formatCurrency(currentBalance);
+        }
+
+        function updateMyBetsDisplay() {
+            const totalMyBets = Object.values(betsPlacedThisRound).reduce((sum, bet) => sum + bet, 0);
+            myBetsDisplay.textContent = formatCurrency(totalMyBets);
+        }
+
+        function updateActiveBetDisplay() {
+            activeBetDisplay.textContent = formatCurrency(activeBetAmount);
+        }
+
+        function showMessage(msg, type = 'info', duration = 3000) {
+            messageArea.textContent = msg;
+            messageArea.className = 'message-area'; // Reset classes
+            if (type === 'error') {
+                messageArea.classList.add('bg-red-700', 'text-white');
+            } else if (type === 'success') {
+                messageArea.classList.add('bg-green-700', 'text-white');
+            } else {
+                messageArea.classList.add('bg-blue-700', 'text-white'); // Default info
+            }
+            setTimeout(() => {
+                messageArea.textContent = 'الرجاء اختيار مبلغ الرهان وفريقك المفضل!';
+                messageArea.className = 'message-area'; // Reset to default styling
+            }, duration);
+        }
+
+        function updateButtonStates() {
+            startRoundButton.disabled = Object.keys(betsPlacedThisRound).length ===
