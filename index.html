@@ -1,449 +1,477 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لعبة تخمين الفريق - تصميم جديد</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<style>
-/* General Body Styling /
-body {
-font-family: 'Inter', sans-serif;
-background: linear-gradient(to bottom, #1E3A8A 0%, #172B6B 100%); / Dark blue gradient from image /
-display: flex;
-justify-content: center;
-align-items: center;
-min-height: 100vh;
-margin: 0;
-color: #E0E7FF; / Light blue/white text /
-overflow-x: hidden;
-padding: 20px; / Add some padding for smaller screens */
-box-sizing: border-box;
-}
-    /* General Container Styling */
-    .game-container {
-        background-color: rgba(255, 255, 255, 0.05); /* Slightly transparent white for a frosted look */
-        border-radius: 20px;
-        padding: 30px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        text-align: center;
-        max-width: 900px; /* Max width for larger screens */
-        width: 100%; /* Full width on smaller screens */
-        backdrop-filter: blur(10px); /* Frosted glass effect */
-        -webkit-backdrop-filter: blur(10px); /* For Safari */
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        display: flex;
-        flex-direction: column;
-        gap: 25px; /* Spacing between main sections */
-    }
-
-    /* Top Bar - Balance, Multipliers, etc. */
-    .top-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap; /* Allow wrapping on smaller screens */
-        gap: 15px; /* Spacing between items */
-        padding-bottom: 20px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .info-item {
-        background-color: rgba(255, 255, 255, 0.1);
-        padding: 10px 20px;
-        border-radius: 15px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 1.1em;
-        font-weight: 700;
-    }
-    .info-item i {
-        color: #FFD700; /* Gold color for icons */
-    }
-
-    /* Main Game Area - Timer and Teams */
-    .main-game-area {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-    }
-
-    .timer-center {
-        font-size: 4em;
-        font-weight: 900;
-        color: #4ADE80; /* Green for active timer */
-        animation: pulse 1.5s infinite alternate; /* Simple pulse effect */
-    }
-    .remaining-text {
-        font-size: 1em;
-        color: #BFDBFE; /* Light blue text */
-    }
-
-    @keyframes pulse {
-        from { transform: scale(1); opacity: 1; }
-        to { transform: scale(1.05); opacity: 0.9; }
-    }
-
-    /* Teams Grid */
-    .teams-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Responsive grid */
-        gap: 20px;
-        width: 100%;
-        justify-items: center;
-    }
-
-    .team-card {
-        background-color: rgba(255, 255, 255, 0.1);
-        border-radius: 15px;
-        padding: 15px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-        cursor: pointer;
-        transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
-        position: relative; /* For bet amount display */
-        width: 100%; /* Ensure cards fill grid cells */
-        max-width: 150px; /* Max width for individual card */
-        box-sizing: border-box; /* Include padding in width */
-    }
-
-    .team-card:hover {
-        transform: translateY(-5px);
-        background-color: rgba(255, 255, 255, 0.15);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-    }
-
-    .team-card.selected {
-        border: 3px solid #60A5FA; /* Blue border for selected */
-        box-shadow: 0 0 15px rgba(96, 165, 250, 0.7);
-    }
-    .team-card.revealed-winning {
-        background-color: #16A34A; /* Green for winning team */
-        color: white;
-        animation: win-glow 1s infinite alternate; /* Glow for winning team */
-    }
-    .team-card.revealed-losing {
-        background-color: #DC2626; /* Red for losing team */
-        color: white;
-    }
-
-    @keyframes win-glow {
-        from { box-shadow: 0 0 10px rgba(22, 163, 74, 0.5), 0 0 20px rgba(22, 163, 74, 0.3); }
-        to { box-shadow: 0 0 20px rgba(22, 163, 74, 0.8), 0 0 30px rgba(22, 163, 74, 0.5); }
-    }
-
-
-    .team-card span {
-        font-weight: 700;
-    }
-
-    .multiplier {
-        background-color: rgba(0, 0, 0, 0.4);
-        padding: 5px 10px;
-        border-radius: 10px;
-        font-size: 0.9em;
-        color: #FFD700; /* Gold color */
-    }
-
-    .bet-amount-display {
-        position: absolute;
-        bottom: -10px; /* Position below the card */
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: #60A5FA; /* Blue background for bet amount */
-        color: white;
-        padding: 5px 10px;
-        border-radius: 8px;
-        font-size: 0.8em;
-        font-weight: bold;
-        white-space: nowrap; /* Prevent wrapping */
-        opacity: 0; /* Hidden by default */
-        transition: opacity 0.2s ease-in-out;
-    }
-    .team-card.selected .bet-amount-display {
-        opacity: 1; /* Show when selected */
-    }
-
-    /* Bet Controls */
-    .bet-controls {
-        background-color: rgba(255, 255, 255, 0.08);
-        border-radius: 15px;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .bet-input-group {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-
-    .bet-input-group label {
-        font-weight: 700;
-    }
-
-    .bet-input {
-        background-color: rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 8px;
-        padding: 10px 15px;
-        color: white;
-        width: 100px;
-        text-align: center;
-        -moz-appearance: textfield; /* Remove number input arrows for Firefox */
-    }
-
-    .bet-input::-webkit-outer-spin-button,
-    .bet-input::-webkit-inner-spin-button {
-        -webkit-appearance: none; /* Remove number input arrows for Chrome, Safari, Edge */
-        margin: 0;
-    }
-
-    .bet-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-
-    .bet-button, .place-bet-button {
-        background-color: #4A90E2; /* Blue button */
-        color: white;
-        padding: 10px 20px;
-        border-radius: 10px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: background-color 0.2s, transform 0.1s;
-        border: none;
-        flex-grow: 1; /* Allow buttons to grow */
-        max-width: 120px; /* Max width for individual bet buttons */
-    }
-    .bet-button:hover, .place-bet-button:hover {
-        background-color: #357ABD;
-        transform: translateY(-2px);
-    }
-    .bet-button:active, .place-bet-button:active {
-        transform: translateY(0);
-    }
-
-    .place-bet-button {
-        background-color: #10B981; /* Green for place bet */
-        max-width: none; /* Allow it to span full width */
-        padding: 12px 25px;
-        font-size: 1.1em;
-    }
-    .place-bet-button:hover {
-        background-color: #0F9D58;
-    }
-    .place-bet-button:disabled {
-        background-color: #6B7280; /* Gray when disabled */
-        cursor: not-allowed;
-    }
-
-    /* Game History / Results */
-    .game-history {
-        background-color: rgba(255, 255, 255, 0.05);
-        border-radius: 15px;
-        padding: 20px;
-        margin-top: 20px;
-    }
-    .history-title {
-        font-size: 1.5em;
-        font-weight: 700;
-        margin-bottom: 15px;
-        color: #BFDBFE;
-    }
-    .history-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: center;
-    }
-    .history-item {
-        background-color: rgba(255, 255, 255, 0.1);
-        padding: 8px 12px;
-        border-radius: 10px;
-        font-size: 0.9em;
-        font-weight: 600;
-    }
-    .history-item.win {
-        color: #4ADE80; /* Green for win */
-    }
-    .history-item.lose {
-        color: #EF4444; /* Red for lose */
-    }
-
-    /* Message Box Styling */
-    .message-box {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 20px 30px;
-        border-radius: 15px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-        display: none; /* Hidden by default */
-        flex-direction: column;
-        align-items: center;
-        gap: 15px;
-        font-size: 1.2em;
-        text-align: center;
-    }
-    .message-box.active {
-        display: flex;
-    }
-    .message-box button {
-        background-color: #60A5FA;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 10px;
-        border: none;
-        cursor: pointer;
-        font-size: 1em;
-        transition: background-color 0.2s;
-    }
-    .message-box button:hover {
-        background-color: #357ABD;
-    }
-
-    /* Responsive Adjustments */
-    @media (max-width: 768px) {
-        .top-bar {
-            flex-direction: column;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تخمين الفريق الخارق</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for the Inter font and general layout */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #2c3e50; /* Darker background inspired by the image */
+            background-image: linear-gradient(135deg, #2c3e50 0%, #0d1a26 100%);
+            display: flex;
+            justify-content: center;
             align-items: center;
-        }
-        .bet-input-group {
-            flex-direction: column;
-            gap: 15px;
-        }
-        .bet-input {
-            width: 80%; /* Wider input on small screens */
-            max-width: 200px;
-        }
-        .bet-buttons {
-            flex-direction: column;
-        }
-        .bet-button, .place-bet-button {
-            width: 100%;
-            max-width: 250px; /* Limit width of buttons */
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
         }
         .game-container {
-            padding: 20px;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 550px; /* Slightly wider for more elements */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+            border: 5px solid #4CAF50; /* Green border for a game feel */
         }
-    }
-</style>
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #333;
+            font-weight: bold;
+        }
+        .timer-display {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ef4444; /* Red for urgency */
+            background-color: #ffe0e0;
+            padding: 8px 15px;
+            border-radius: 10px;
+            min-width: 80px;
+        }
+        .score-display {
+            font-size: 1.8rem;
+            color: #10b981; /* Green for score */
+            font-weight: 800;
+        }
+        .round-info {
+            font-size: 1.2rem;
+            color: #555;
+            font-weight: 600;
+        }
 
+        .team-image {
+            width: 180px; /* Larger image */
+            height: 180px;
+            object-fit: contain;
+            margin: 0 auto 25px auto;
+            border-radius: 50%; /* Make it round */
+            border: 5px solid #3b82f6; /* Blue border */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease-in-out;
+        }
+        .team-image.correct-animation {
+            animation: bounce-in 0.5s ease-out;
+        }
+        .team-image.incorrect-animation {
+            animation: shake 0.5s ease-out;
+        }
+
+        @keyframes bounce-in {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        input[type="text"] {
+            border: 2px solid #a0aec0; /* Lighter gray border */
+            padding: 14px 20px;
+            border-radius: 12px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 1.2rem;
+            color: #333;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #3b82f6; /* Blue focus */
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
+        }
+        button {
+            background-color: #4CAF50; /* Primary green button */
+            color: white;
+            padding: 14px 30px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            border: none;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px; /* Spacing between input and button */
+        }
+        button:hover {
+            background-color: #45a049; /* Darker green */
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+        button.red-button {
+            background-color: #ef4444; /* Red button for New Game/Reset */
+            margin-top: 20px;
+        }
+        button.red-button:hover {
+            background-color: #dc2626;
+        }
+
+        .message {
+            margin-top: 15px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .correct {
+            color: #10b981; /* Tailwind emerald-500 */
+            background-color: #d1fae5; /* Light green background */
+        }
+        .incorrect {
+            color: #ef4444; /* Tailwind red-500 */
+            background-color: #fee2e2; /* Light red background */
+        }
+        .hint-text {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+        .game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 20px;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .game-over-screen.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .game-over-screen h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #FFD700; /* Gold color */
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+        }
+        .game-over-screen p {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: #fff;
+        }
+        .game-over-screen button {
+            width: auto;
+            min-width: 200px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .game-container {
+                padding: 20px;
+                gap: 15px;
+            }
+            .game-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .timer-display {
+                font-size: 1.8rem;
+            }
+            .score-display, .round-info {
+                font-size: 1.6rem;
+            }
+            .team-image {
+                width: 140px;
+                height: 140px;
+                margin-bottom: 15px;
+            }
+            input[type="text"] {
+                padding: 10px 15px;
+                font-size: 1rem;
+            }
+            button {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+            .message {
+                font-size: 1rem;
+            }
+            .hint-text {
+                font-size: 1rem;
+                margin-bottom: 15px;
+            }
+            .game-over-screen h2 {
+                font-size: 2.5rem;
+            }
+            .game-over-screen p {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="game-container">
-<div class="top-bar">
-<div class="info-item">
-<i class="fas fa-wallet"></i>
-<span id="balance">1000.00</span>
-</div>
-<div class="info-item">
-<i class="fas fa-hand-holding-usd"></i>
-<span id="total-bet">0.00</span>
-</div>
-<div class="info-item">
-<i class="fas fa-star"></i>
-<span id="current-multiplier">x2.00</span>
-</div>
-</div>
-    <div class="main-game-area">
-        <div class="text-xl font-bold remaining-text" id="game-status-text">وقت التخمين المتبقي:</div>
-        <div class="timer-center font-extrabold" id="timer">--</div>
-
-        <div class="teams-grid" id="teams-container">
-            </div>
-    </div>
-
-    <div class="bet-controls">
-        <div class="bet-input-group">
-            <label for="bet-amount" class="text-lg">مبلغ الرهان:</label>
-            <input type="number" id="bet-amount" class="bet-input" value="10" min="1" step="1">
-            <div class="bet-buttons">
-                <button class="bet-button" data-amount="10">+10</button>
-                <button class="bet-button" data-amount="50">+50</button>
-                <button class="bet-button" data-amount="100">+100</button>
-                <button class="bet-button" data-action="half">نصف</button>
-                <button class="bet-button" data-action="double">ضعف</button>
-                <button class="bet-button" data-action="max">الكل</button>
-            </div>
+    <div class="game-container">
+        <div class="game-header">
+            <div class="score-display">النقاط: <span id="score-value">0</span></div>
+            <div class="round-info">الجولة: <span id="round-value">1</span></div>
+            <div class="timer-display" id="timer-display">30</div>
         </div>
-        <button id="place-bet-button" class="place-bet-button" disabled>ضع الرهان</button>
+
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">تخمين الفريق الخارق!</h1>
+        <p class="hint-text" id="hint-text"></p>
+        <img id="team-image" class="team-image" src="" alt="شعار الفريق">
+        <input type="text" id="guess-input" placeholder="اكتب اسم الفريق هنا..." class="mb-4">
+        <button id="submit-guess">تخمين</button>
+        <p class="message" id="message"></p>
+        <button id="skip-button" class="bg-gray-500 hover:bg-gray-600">تخطي الفريق</button>
+
+
+        <div class="game-over-screen" id="game-over-screen">
+            <h2>انتهت اللعبة!</h2>
+            <p>نقاطك النهائية: <span id="final-score">0</span></p>
+            <button id="play-again-button" class="bg-blue-500 hover:bg-blue-600">العب مرة أخرى</button>
+        </div>
     </div>
 
-    <div class="game-history">
-        <h3 class="history-title">نتائج الجولات السابقة</h3>
-        <div class="history-list" id="history-list">
-            </div>
-    </div>
-</div>
+    <script>
+        // Array of football teams with a hint and actual placeholder image URLs.
+        // In a real app, you'd replace these with actual team logo URLs for better user experience.
+        const teams = [
+            { name: "ريال مدريد", hint: "أكثر الأندية فوزاً بدوري أبطال أوروبا.", imageUrl: "https://placehold.co/180x180/004C99/FFFFFF?text=RM" },
+            { name: "برشلونة", hint: "النادي الكتالوني الذي اشتهر بأسلوب التيكي تاكا.", imageUrl: "https://placehold.co/180x180/EDBB00/000080?text=FCB" },
+            { name: "ليفربول", hint: "الريدز، نادٍ إنجليزي شهير.", imageUrl: "https://placehold.co/180x180/C8102E/FFFFFF?text=LFC" },
+            { name: "مانشستر يونايتد", hint: "الشياطين الحمر من مدينة مانشستر.", imageUrl: "https://placehold.co/180x180/DA291C/000000?text=MU" },
+            { name: "بايرن ميونخ", hint: "النادي البافاري المهيمن على الدوري الألماني.", imageUrl: "https://placehold.co/180x180/DC052D/FFFFFF?text=BM" },
+            { name: "يوفنتوس", hint: "السيدة العجوز من إيطاليا.", imageUrl: "https://placehold.co/180x180/000000/FFFFFF?text=JU" },
+            { name: "باريس سان جيرمان", hint: "النادي الفرنسي الذي يضم العديد من النجوم.", imageUrl: "https://placehold.co/180x180/004170/FFFFFF?text=PSG" },
+            { name: "الأهلي المصري", hint: "النادي الأكثر تتويجاً بالبطولات القارية في أفريقيا.", imageUrl: "https://placehold.co/180x180/DC143C/FFFFFF?text=AHLY" },
+            { name: "الهلال السعودي", hint: "الزعيم، النادي الأكثر فوزاً بالدوري السعودي.", imageUrl: "https://placehold.co/180x180/003366/FFFFFF?text=HLAL" },
+            { name: "بوكا جونيورز", hint: "نادي أرجنتيني شهير، يقع ملعبه في لا بومبونيرا.", imageUrl: "https://placehold.co/180x180/0033A0/FDBE11?text=BOCA" },
+            { name: "بوروسيا دورتموند", hint: "أسود الفيستفاليا، تشتهر بجمهورها الشغوف.", imageUrl: "https://placehold.co/180x180/FDE101/000000?text=BVB" },
+            { name: "إنتر ميلان", hint: "النيراتزوري، منافس ميلان اللدود.", imageUrl: "https://placehold.co/180x180/005A9C/F0F0F0?text=INT" },
+            { name: "أتلتيكو مدريد", hint: "الروخيبلانكوس، منافس ريال مدريد في العاصمة.", imageUrl: "https://placehold.co/180x180/CB3524/FFFFFF?text=ATM" },
+            { name: "أرسنال", hint: "الجانرز، النادي اللندني الشهير.", imageUrl: "https://placehold.co/180x180/EF0107/FFFFFF?text=ARS" },
+            { name: "تشيلسي", hint: "البلوز، نادٍ آخر كبير من لندن.", imageUrl: "https://placehold.co/180x180/034694/FFFFFF?text=CHE" },
+            { name: "بورتو", hint: "التنانين، من كبار الأندية البرتغالية.", imageUrl: "https://placehold.co/180x180/0000FF/FFFFFF?text=POR" },
+            { name: "أياكس", hint: "نادي أمستردام، معروف بأكاديميته الممتازة.", imageUrl: "https://placehold.co/180x180/D2122E/FFFFFF?text=AJX" },
+            { name: "جالطة سراي", hint: "النادي التركي الأكثر شعبية.", imageUrl: "https://placehold.co/180x180/FFC200/800000?text=GS" },
+            { name: "الزمالك", hint: "النادي المصري الأبيض، المنافس التقليدي للأهلي.", imageUrl: "https://placehold.co/180x180/FFFFFF/000000?text=ZSC" },
+            { name: "النصر السعودي", hint: "العالمي، يضم نجوم عالميين.", imageUrl: "https://placehold.co/180x180/FFCD00/000000?text=NSR" }
+        ];
 
-<div id="message-box" class="message-box">
-    <p id="message-content"></p>
-    <button id="message-box-ok">موافق</button>
-</div>
+        let currentTeam = {};
+        let score = 0;
+        let round = 0;
+        let timer;
+        const INITIAL_TIME = 30; // seconds per round
+        let timeLeft = INITIAL_TIME;
+        const MAX_ROUNDS = 10; // Number of rounds to play
 
-<script>
-    // Global error handler to catch uncaught exceptions and display them in the message box.
-    window.onerror = function(message, source, lineno, colno, error) {
-        console.error("An unhandled error occurred:", { message, source, lineno, colno, error });
-        showMessage(`حدث خطأ غير متوقع: ${message}. يرجى المحاولة مرة أخرى.`);
-        return true; // Prevent default browser error handling
-    };
+        // DOM elements
+        const hintTextElement = document.getElementById('hint-text');
+        const teamImageElement = document.getElementById('team-image');
+        const guessInput = document.getElementById('guess-input');
+        const submitButton = document.getElementById('submit-guess');
+        const skipButton = document.getElementById('skip-button');
+        const messageElement = document.getElementById('message');
+        const scoreValueElement = document.getElementById('score-value');
+        const roundValueElement = document.getElementById('round-value');
+        const timerDisplayElement = document.getElementById('timer-display');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const finalScoreElement = document.getElementById('final-score');
+        const playAgainButton = document.getElementById('play-again-button');
 
-    // Game state variables
-    let balance = 1000;
-    let selectedTeam = null; // Stores the ID of the selected team
-    let betAmount = 0; // Current bet amount in the input
-    let timer = 10; // Initial countdown time
-    let gameInterval;
-    let gameRound = 0; // Tracks current round
-    let teamData = [];
-    const multipliers = [1.5, 1.8, 2.0, 2.2, 2.5, 2.8, 3.0, 3.5, 4.0, 5.0]; // Example multipliers
-    let currentMultiplier = 2.00; // Multiplier for the current round
-    let history = []; // To store game outcomes { outcome: 'win'/'lose', team: 'Team X', bet: 10, winnings: 20 }
-    let roundActive = false; // Flag to indicate if a round is active
+        // Function to update score and round display
+        function updateDisplay() {
+            scoreValueElement.textContent = score;
+            roundValueElement.textContent = round;
+        }
 
-    // DOM elements
-    const balanceDisplay = document.getElementById('balance');
-    const totalBetDisplay = document.getElementById('total-bet');
-    const currentMultiplierDisplay = document.getElementById('current-multiplier');
-    const timerDisplay = document.getElementById('timer');
-    const gameStatusText = document.getElementById('game-status-text');
-    const teamsContainer = document.getElementById('teams-container');
-    const betAmountInput = document.getElementById('bet-amount');
-    const betButtons = document.querySelectorAll('.bet-button');
-    const placeBetButton = document.getElementById('place-bet-button');
-    const historyList = document.getElementById('history-list');
-    const messageBox = document.getElementById('message-box');
-    const messageContent = document.getElementById('message-content');
-    const messageBoxOkButton = document.getElementById('message-box-ok');
+        // Function to start the timer
+        function startTimer() {
+            clearInterval(timer); // Clear any existing timer
+            timeLeft = INITIAL_TIME;
+            timerDisplayElement.textContent = timeLeft;
+            timer = setInterval(() => {
+                timeLeft--;
+                timerDisplayElement.textContent = timeLeft;
+                if (timeLeft <= 10) {
+                    timerDisplayElement.style.color = '#ef4444'; // Red for last 10 seconds
+                } else {
+                    timerDisplayElement.style.color = '#3b82f6'; // Blue otherwise
+                }
 
-    // --- Utility Functions ---
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    messageElement.textContent = `انتهى الوقت! الإجابة الصحيحة كانت: ${currentTeam.name}`;
+                    messageElement.className = 'message incorrect';
+                    setTimeout(nextRound, 2000); // Move to next round after 2 seconds
+                }
+            }, 1000);
+        }
 
-    // Function to display messages in a custom modal
-    function showMessage(message) {
-        messageContent.textContent = message;
-        messageBox.classList.add('active');
-    }
+        // Function to end the game
+        function endGame() {
+            clearInterval(timer);
+            finalScoreElement.textContent = score;
+            gameOverScreen.classList.add('active');
+            guessInput.disabled = true;
+            submitButton.disabled = true;
+            skipButton.disabled = true;
+        }
 
-    // Get a random multiplier from the defined list
-    function getRandomMultiplier() {
-        const randomIndex = Math.floor(Math.random() * multipliers.length);
-        return multipliers
+        // Function to start a new round
+        function nextRound() {
+            if (round >= MAX_ROUNDS) {
+                endGame();
+                return;
+            }
+
+            round++;
+            startNewGame(false); // Start new round without resetting score
+            updateDisplay();
+        }
+
+        // Function to start a new game (or round if resetScore is false)
+        function startNewGame(resetScore = true) {
+            // Reset game state if starting a completely new game
+            if (resetScore) {
+                score = 0;
+                round = 0;
+                gameOverScreen.classList.remove('active');
+            }
+
+            // Clear previous messages and input
+            messageElement.textContent = '';
+            messageElement.className = 'message';
+            guessInput.value = '';
+            guessInput.disabled = false;
+            submitButton.disabled = false;
+            skipButton.disabled = false;
+            teamImageElement.classList.remove('correct-animation', 'incorrect-animation'); // Clear animations
+
+            // Select a random team that hasn't been guessed yet (for this session)
+            let availableTeams = teams.filter(team => !team.guessed);
+            if (availableTeams.length === 0) {
+                // If all teams guessed, reset 'guessed' status for all teams to start over
+                teams.forEach(team => team.guessed = false);
+                availableTeams = teams;
+            }
+
+            const randomIndex = Math.floor(Math.random() * availableTeams.length);
+            currentTeam = availableTeams[randomIndex];
+            currentTeam.guessed = true; // Mark as guessed for this session
+
+            // Display the hint and image
+            hintTextElement.textContent = currentTeam.hint;
+            teamImageElement.src = currentTeam.imageUrl;
+            teamImageElement.alt = `شعار فريق ${currentTeam.name}`; // Update alt text for accessibility
+            // Fallback for image loading errors
+            teamImageElement.onerror = function() {
+                this.src = `https://placehold.co/180x180/CCCCCC/000000?text=خطأ+صورة`;
+                this.alt = "خطأ في تحميل الصورة";
+            };
+
+            startTimer(); // Start timer for the new round
+            updateDisplay();
+        }
+
+        // Function to handle a guess
+        function handleGuess() {
+            const userGuess = guessInput.value.trim();
+
+            if (userGuess === '') {
+                messageElement.textContent = 'الرجاء إدخال تخمين.';
+                messageElement.className = 'message incorrect';
+                return;
+            }
+
+            // Normalize names for comparison (e.g., remove spaces, convert to lowercase, handle Arabic specific chars if needed)
+            const normalize = (text) => text.toLowerCase().replace(/[^\p{L}\p{N}]/gu, ''); // Unicode-aware regex
+            const normalizedUserGuess = normalize(userGuess);
+            const normalizedTeamName = normalize(currentTeam.name);
+
+            if (normalizedUserGuess === normalizedTeamName) {
+                messageElement.textContent = `صحيح! الإجابة هي ${currentTeam.name}.`;
+                messageElement.className = 'message correct';
+                score++;
+                teamImageElement.classList.add('correct-animation');
+                guessInput.disabled = true;
+                submitButton.disabled = true;
+                skipButton.disabled = true;
+                clearInterval(timer); // Stop timer on correct guess
+                setTimeout(nextRound, 1500); // Wait a bit before next round
+            } else {
+                messageElement.textContent = 'خطأ، حاول مرة أخرى!';
+                messageElement.className = 'message incorrect';
+                teamImageElement.classList.add('incorrect-animation');
+                // Remove animation class after it plays to allow re-triggering
+                teamImageElement.addEventListener('animationend', () => {
+                    teamImageElement.classList.remove('incorrect-animation');
+                }, { once: true });
+            }
+            updateDisplay();
+        }
+
+        // Function to handle skipping a team
+        function handleSkip() {
+            clearInterval(timer);
+            messageElement.textContent = `تخطيت الفريق. الإجابة كانت: ${currentTeam.name}`;
+            messageElement.className = 'message incorrect'; // Mark as incorrect since it's skipped
+            setTimeout(nextRound, 1500); // Go to next round
+        }
+
+        // Event Listeners
+        submitButton.addEventListener('click', handleGuess);
+        guessInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                handleGuess();
+            }
+        });
+        skipButton.addEventListener('click', handleSkip);
+        playAgainButton.addEventListener('click', () => startNewGame(true)); // Start new game with score reset
+
+        // Start the first game when the page loads
+        window.onload = () => startNewGame(true);
+    </script>
+</body>
+</html>
+
