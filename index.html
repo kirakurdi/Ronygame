@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,9 +8,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* General Body Styling */
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(to bottom, #1E3A8A 0%, #172B6B 100%); /* Dark blue gradient */
+            background: linear-gradient(to bottom, #1E3A8A 0%, #172B6B 100%); /* Dark blue gradient from image */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -165,378 +166,388 @@
             font-weight: bold;
             white-space: nowrap; /* Prevent wrapping */
             opacity: 0; /* Hidden by default */
-            transition: opacity 0.3s ease-in-out;
+            transition: opacity 0.2s ease-in-out;
         }
-
-        .bet-amount-display.visible {
-            opacity: 1;
+        .team-card.selected .bet-amount-display {
+            opacity: 1; /* Show when selected */
         }
 
         /* Bet Controls */
         .bet-controls {
+            background-color: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 15px;
-            width: 100%;
         }
 
         .bet-input-group {
             display: flex;
-            gap: 10px;
-            align-items: center;
             justify-content: center;
-            flex-wrap: wrap; /* Allow wrapping */
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .bet-input-group label {
+            font-weight: 700;
         }
 
         .bet-input {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
+            border-radius: 8px;
             padding: 10px 15px;
-            color: #E0E7FF;
-            font-size: 1em;
-            width: 100px; /* Fixed width for input */
+            color: white;
+            width: 100px;
             text-align: center;
-        }
-        .bet-input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
+            -moz-appearance: textfield; /* Remove number input arrows for Firefox */
         }
 
-        .bet-button {
-            background-color: #60A5FA; /* Blue */
+        .bet-input::-webkit-outer-spin-button,
+        .bet-input::-webkit-inner-spin-button {
+            -webkit-appearance: none; /* Remove number input arrows for Chrome, Safari, Edge */
+            margin: 0;
+        }
+
+        .bet-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .bet-button, .place-bet-button {
+            background-color: #4A90E2; /* Blue button */
             color: white;
             padding: 10px 20px;
             border-radius: 10px;
             font-weight: 700;
             cursor: pointer;
             transition: background-color 0.2s, transform 0.1s;
+            border: none;
             flex-grow: 1; /* Allow buttons to grow */
-            max-width: 120px; /* Max width for buttons */
+            max-width: 120px; /* Max width for individual bet buttons */
         }
-        .bet-button:hover {
-            background-color: #3B82F6; /* Darker blue */
+        .bet-button:hover, .place-bet-button:hover {
+            background-color: #357ABD;
             transform: translateY(-2px);
         }
-        .bet-button:active {
+        .bet-button:active, .place-bet-button:active {
             transform: translateY(0);
         }
-        .bet-button:disabled {
-            background-color: #9CA3AF; /* Gray for disabled */
-            cursor: not-allowed;
-        }
 
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .start-button, .reset-button {
-            background-color: #10B981; /* Green */
-            color: white;
+        .place-bet-button {
+            background-color: #10B981; /* Green for place bet */
+            max-width: none; /* Allow it to span full width */
             padding: 12px 25px;
-            border-radius: 12px;
             font-size: 1.1em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.1s;
-            flex-grow: 1;
-            max-width: 200px;
         }
-        .reset-button {
-            background-color: #EF4444; /* Red */
+        .place-bet-button:hover {
+            background-color: #0F9D58;
+        }
+        .place-bet-button:disabled {
+            background-color: #6B7280; /* Gray when disabled */
+            cursor: not-allowed;
         }
 
-        .start-button:hover {
-            background-color: #059669;
-            transform: translateY(-2px);
+        /* Game History / Results */
+        .game-history {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
         }
-        .reset-button:hover {
-            background-color: #DC2626;
-            transform: translateY(-2px);
+        .history-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #BFDBFE;
         }
-        .start-button:active, .reset-button:active {
-            transform: translateY(0);
+        .history-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
         }
-        .start-button:disabled {
-            background-color: #9CA3AF;
-            cursor: not-allowed;
+        .history-item {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        .history-item.win {
+            color: #4ADE80; /* Green for win */
+        }
+        .history-item.lose {
+            color: #EF4444; /* Red for lose */
         }
 
         /* Message Box Styling */
         .message-box {
-            background-color: rgba(255, 255, 255, 0.15);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
-            color: #FFD700; /* Gold */
-            font-weight: bold;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
             display: none; /* Hidden by default */
-            animation: fadeIn 0.5s ease-out;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.2em;
+            text-align: center;
         }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .message-box.active {
+            display: flex;
+        }
+        .message-box button {
+            background-color: #60A5FA;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s;
+        }
+        .message-box button:hover {
+            background-color: #357ABD;
         }
 
         /* Responsive Adjustments */
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
             .top-bar {
                 flex-direction: column;
-                align-items: stretch;
-            }
-            .info-item {
-                justify-content: center;
+                align-items: center;
             }
             .bet-input-group {
                 flex-direction: column;
+                gap: 15px;
             }
-            .bet-input, .bet-button {
-                width: 100%;
-                max-width: none;
+            .bet-input {
+                width: 80%; /* Wider input on small screens */
+                max-width: 200px;
             }
-            .action-buttons {
+            .bet-buttons {
                 flex-direction: column;
+            }
+            .bet-button, .place-bet-button {
+                width: 100%;
+                max-width: 250px; /* Limit width of buttons */
+            }
+            .game-container {
+                padding: 20px;
             }
         }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <!-- Top Bar - Balance, Multipliers -->
+        <!-- Top Bar -->
         <div class="top-bar">
             <div class="info-item">
                 <i class="fas fa-wallet"></i>
                 <span id="balance">1000</span>
-                <span>$</span>
             </div>
             <div class="info-item">
-                <i class="fas fa-percentage"></i>
-                <span>مضاعف:</span>
-                <span id="current-multiplier">1.95X</span>
+                <i class="fas fa-hand-holding-usd"></i>
+                <span id="total-bet">0</span>
             </div>
             <div class="info-item">
-                <i class="fas fa-trophy"></i>
-                <span>الأرباح المحتملة:</span>
-                <span id="potential-win">0</span>
-                <span>$</span>
+                <i class="fas fa-star"></i>
+                <span id="current-multiplier">x2.00</span>
             </div>
         </div>
 
-        <!-- Main Game Area - Timer and Teams -->
+        <!-- Main Game Area -->
         <div class="main-game-area">
-            <div id="timer-display" class="timer-center">00</div>
-            <div class="remaining-text">ثوانٍ متبقية للرهان</div>
+            <div class="text-xl font-bold remaining-text" id="game-status-text">وقت التخمين المتبقي:</div>
+            <div class="timer-center font-extrabold" id="timer">--</div>
 
-            <div class="teams-grid" id="teams-grid">
-                <!-- Team Cards will be inserted here by JavaScript -->
+            <div class="teams-grid" id="teams-container">
+                <!-- Team cards will be injected here by JavaScript -->
             </div>
         </div>
 
         <!-- Bet Controls -->
         <div class="bet-controls">
             <div class="bet-input-group">
-                <input type="number" id="bet-amount" class="bet-input" placeholder="أدخل مبلغ الرهان" min="1">
-                <button class="bet-button" id="bet-50">+50</button>
-                <button class="bet-button" id="bet-100">+100</button>
-                <button class="bet-button" id="bet-max">الحد الأقصى</button>
+                <label for="bet-amount" class="text-lg">مبلغ الرهان:</label>
+                <input type="number" id="bet-amount" class="bet-input" value="10" min="1" step="1">
+                <div class="bet-buttons">
+                    <button class="bet-button" data-amount="10">+10</button>
+                    <button class="bet-button" data-amount="50">+50</button>
+                    <button class="bet-button" data-amount="100">+100</button>
+                    <button class="bet-button" data-action="half">نصف</button>
+                    <button class="bet-button" data-action="double">ضعف</button>
+                    <button class="bet-button" data-action="max">الكل</button>
+                </div>
             </div>
-            <div class="action-buttons">
-                <button class="start-button" id="start-game-button">بدء الجولة</button>
-                <button class="reset-button" id="reset-game-button">إعادة تعيين اللعبة</button>
-            </div>
+            <button id="place-bet-button" class="place-bet-button" disabled>ضع الرهان</button>
         </div>
 
-        <!-- Message Box -->
-        <div id="message-box" class="message-box"></div>
+        <!-- Game History -->
+        <div class="game-history">
+            <h3 class="history-title">نتائج الألعاب السابقة</h3>
+            <div class="history-list" id="history-list">
+                <!-- History items will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Box -->
+    <div id="message-box" class="message-box">
+        <p id="message-content"></p>
+        <button id="message-box-ok">موافق</button>
     </div>
 
     <script>
-        // Game State Variables
+        // Game state variables
         let balance = 1000;
-        let betAmount = 0;
         let selectedTeam = null;
-        let timer = 10; // Initial timer value
-        let countdownInterval;
-        let gameStarted = false;
-        let teams = [
-            { id: 'teamA', name: 'الفريق أ', image: 'https://placehold.co/70x70/2563EB/ffffff?text=A' },
-            { id: 'teamB', name: 'الفريق ب', image: 'https://placehold.co/70x70/DC2626/ffffff?text=B' },
-            { id: 'teamC', name: 'الفريق ج', image: 'https://placehold.co/70x70/10B981/ffffff?text=C' },
-            { id: 'teamD', name: 'الفريق د', image: 'https://placehold.co/70x70/F59E0B/ffffff?text=D' }
-        ];
+        let betAmount = 0;
+        let timer = 10; // Initial countdown time
+        let gameInterval;
+        let gameRound = 0;
+        let teamData = [];
+        let multipliers = [1.5, 1.8, 2.0, 2.2, 2.5, 2.8, 3.0, 3.5, 4.0, 5.0]; // Example multipliers
+        let currentMultiplier = 2.00;
+        let history = []; // To store game outcomes
 
-        // DOM Elements
+        // DOM elements
         const balanceDisplay = document.getElementById('balance');
-        const potentialWinDisplay = document.getElementById('potential-win');
-        const timerDisplay = document.getElementById('timer-display');
+        const totalBetDisplay = document.getElementById('total-bet');
+        const currentMultiplierDisplay = document.getElementById('current-multiplier');
+        const timerDisplay = document.getElementById('timer');
+        const gameStatusText = document.getElementById('game-status-text');
+        const teamsContainer = document.getElementById('teams-container');
         const betAmountInput = document.getElementById('bet-amount');
-        const teamsGrid = document.getElementById('teams-grid');
-        const startGameButton = document.getElementById('start-game-button');
-        const resetGameButton = document.getElementById('reset-game-button');
+        const betButtons = document.querySelectorAll('.bet-button');
+        const placeBetButton = document.getElementById('place-bet-button');
+        const historyList = document.getElementById('history-list');
         const messageBox = document.getElementById('message-box');
+        const messageContent = document.getElementById('message-content');
+        const messageBoxOkButton = document.getElementById('message-box-ok');
 
-        // Initial Setup
-        document.addEventListener('DOMContentLoaded', () => {
-            try {
-                console.log('DOMContentLoaded: Initializing game...');
-                updateBalanceDisplay();
-                renderTeams();
-                updateBetControls();
-                console.log('DOMContentLoaded: Game initialized successfully.');
-            } catch (error) {
-                console.error('DOMContentLoaded Error:', error);
-                showMessage('حدث خطأ أثناء تهيئة اللعبة: ' + error.message, 'error');
-            }
+        // Function to display messages in a custom modal
+        function showMessage(message) {
+            messageContent.textContent = message;
+            messageBox.classList.add('active');
+        }
+
+        // Event listener for message box OK button
+        messageBoxOkButton.addEventListener('click', () => {
+            messageBox.classList.remove('active');
         });
 
-        // Function to update balance display
-        function updateBalanceDisplay() {
-            balanceDisplay.textContent = balance.toFixed(2); // Display with 2 decimal places
-            console.log('Balance updated to:', balance);
+        // Initialize game: fetch team data and set up UI
+        async function initializeGame() {
+            // Placeholder for team images. In a real app, you might fetch these or have them locally.
+            const placeholderImages = [
+                'https://placehold.co/70x70/FF0000/FFFFFF?text=Team+A', // Red
+                'https://placehold.co/70x70/0000FF/FFFFFF?text=Team+B', // Blue
+                'https://placehold.co/70x70/00FF00/FFFFFF?text=Team+C', // Green
+                'https://placehold.co/70x70/FFFF00/000000?text=Team+D', // Yellow
+                'https://placehold.co/70x70/800080/FFFFFF?text=Team+E', // Purple
+                'https://placehold.co/70x70/FFA500/FFFFFF?text=Team+F'  // Orange
+            ];
+
+            // Generate 6 random teams
+            teamData = Array.from({ length: 6 }, (_, i) => ({
+                id: `team${i + 1}`,
+                name: `الفريق ${i + 1}`,
+                image: placeholderImages[i % placeholderImages.length], // Use placeholder images
+                multiplier: getRandomMultiplier() // Assign a random multiplier
+            }));
+
+            renderTeams();
+            updateUI();
+            startNewRound();
         }
 
-        // Function to update potential win display
-        function updatePotentialWin() {
-            const multiplier = parseFloat(document.getElementById('current-multiplier').textContent);
-            potentialWinDisplay.textContent = (betAmount * multiplier).toFixed(2);
-            console.log('Potential Win updated to:', potentialWinDisplay.textContent);
+        // Get a random multiplier from the defined list
+        function getRandomMultiplier() {
+            return multipliers[Math.floor(Math.random() * multipliers.length)].toFixed(2);
         }
 
-        // Function to render team cards dynamically
+        // Render team cards dynamically
         function renderTeams() {
-            teamsGrid.innerHTML = ''; // Clear existing cards
-            teams.forEach(team => {
+            teamsContainer.innerHTML = '';
+            teamData.forEach(team => {
                 const teamCard = document.createElement('div');
                 teamCard.classList.add('team-card');
                 teamCard.id = team.id;
                 teamCard.innerHTML = `
-                    <img src="${team.image}" alt="Team ${team.name}">
+                    <img src="${team.image}" alt="${team.name} شعار">
                     <span>${team.name}</span>
-                    <div class="multiplier">1.95X</div>
-                    <div class="bet-amount-display" id="bet-display-${team.id}">$0</div>
+                    <span class="multiplier">x${team.multiplier}</span>
+                    <div class="bet-amount-display" id="bet-display-${team.id}">0</div>
                 `;
                 teamCard.addEventListener('click', () => selectTeam(team.id));
-                teamsGrid.appendChild(teamCard);
+                teamsContainer.appendChild(teamCard);
             });
-            console.log('Teams rendered successfully.');
         }
 
-        // Function to select a team
-        function selectTeam(teamId) {
-            console.log('Attempting to select team:', teamId);
-            if (gameStarted) {
-                showMessage('لا يمكنك تغيير الفريق بعد بدء الجولة.', 'error');
-                console.warn('Attempted to change team while game started.');
-                return;
-            }
-            // Remove 'selected' class from all teams
-            document.querySelectorAll('.team-card').forEach(card => {
-                card.classList.remove('selected');
-                card.querySelector(`.bet-amount-display`).classList.remove('visible'); // Hide all bet displays
+        // Update the game UI
+        function updateUI() {
+            balanceDisplay.textContent = balance.toFixed(2);
+            totalBetDisplay.textContent = betAmount.toFixed(2);
+            currentMultiplierDisplay.textContent = `x${currentMultiplier}`;
+            placeBetButton.disabled = selectedTeam === null || betAmount <= 0 || betAmount > balance;
+            betAmountInput.value = betAmount;
+
+            // Update individual team bet displays
+            teamsContainer.querySelectorAll('.bet-amount-display').forEach(display => {
+                display.textContent = '0';
+                display.style.opacity = '0';
             });
-
-            // Add 'selected' class to the clicked team
-            const selected = document.getElementById(teamId);
-            if (selected) {
-                selected.classList.add('selected');
-                selectedTeam = teamId;
-                updateBetControls(); // Re-enable/disable bet buttons based on selection
-                if (betAmount > 0) {
-                    selected.querySelector(`.bet-amount-display`).classList.add('visible');
-                }
-                showMessage(`لقد اخترت ${teams.find(t => t.id === teamId).name}.`);
-                console.log('Team selected:', selectedTeam);
-            } else {
-                console.error('Selected team element not found for ID:', teamId);
-            }
-        }
-
-        // Function to add bet amount
-        function addBet(amount) {
-            console.log('Attempting to add bet:', amount);
-            if (gameStarted) {
-                showMessage('لا يمكنك إضافة رهان بعد بدء الجولة.', 'error');
-                console.warn('Attempted to add bet while game started.');
-                return;
-            }
-            if (!selectedTeam) {
-                showMessage('يرجى اختيار فريق أولاً.', 'error');
-                console.warn('Attempted to add bet without selecting a team.');
-                return;
-            }
-
-            const newBet = betAmount + amount;
-            if (newBet > balance) {
-                showMessage('ليس لديك رصيد كافٍ لهذا الرهان.', 'error');
-                console.warn('Insufficient balance to add bet. Current balance:', balance, 'New bet:', newBet);
-                return;
-            }
-            betAmount = newBet;
-            betAmountInput.value = betAmount;
-            updateBetDisplay();
-            updatePotentialWin();
-            showMessage(`تم إضافة ${amount}$ إلى رهانك.`);
-            console.log('Bet amount updated to:', betAmount);
-        }
-
-        // Function to set bet to max available balance
-        function setMaxBet() {
-            console.log('Attempting to set max bet.');
-            if (gameStarted) {
-                showMessage('لا يمكنك إضافة رهان بعد بدء الجولة.', 'error');
-                console.warn('Attempted to set max bet while game started.');
-                return;
-            }
-            if (!selectedTeam) {
-                showMessage('يرجى اختيار فريق أولاً.', 'error');
-                console.warn('Attempted to set max bet without selecting a team.');
-                return;
-            }
-            betAmount = balance;
-            betAmountInput.value = betAmount;
-            updateBetDisplay();
-            updatePotentialWin();
-            showMessage('تم تعيين الرهان على الحد الأقصى لرصيدك.');
-            console.log('Bet amount set to max:', betAmount);
-        }
-
-        // Update bet display on the card
-        function updateBetDisplay() {
-            teams.forEach(team => {
-                const betDisplay = document.getElementById(`bet-display-${team.id}`);
-                if (betDisplay) {
-                    if (team.id === selectedTeam) {
-                        betDisplay.textContent = `$${betAmount}`;
-                        betDisplay.classList.add('visible');
-                    } else {
-                        betDisplay.classList.remove('visible');
+            if (selectedTeam) {
+                const selectedTeamElement = document.getElementById(selectedTeam);
+                if (selectedTeamElement) {
+                    selectedTeamElement.classList.add('selected');
+                    const betDisplay = document.getElementById(`bet-display-${selectedTeam}`);
+                    if (betDisplay) {
+                        betDisplay.textContent = betAmount.toFixed(2);
+                        betDisplay.style.opacity = '1';
                     }
                 }
-            });
-            console.log('Bet display updated for selected team.');
+            }
+        }
+
+        // Select a team
+        function selectTeam(teamId) {
+            // Remove 'selected' class from previously selected team
+            if (selectedTeam) {
+                document.getElementById(selectedTeam).classList.remove('selected');
+                document.getElementById(`bet-display-${selectedTeam}`).style.opacity = '0';
+            }
+
+            selectedTeam = teamId;
+            document.getElementById(selectedTeam).classList.add('selected');
+            document.getElementById(`bet-display-${selectedTeam}`).style.opacity = '1';
+
+            updateUI();
         }
 
         // Handle bet amount input changes
         betAmountInput.addEventListener('input', (e) => {
-            console.log('Bet input changed:', e.target.value);
-            let value = parseInt(e.target.value);
+            let value = parseFloat(e.target.value);
             if (isNaN(value) || value < 0) {
                 value = 0;
             }
-            if (value > balance) {
-                value = balance; // Cap at balance
-                showMessage('لا يمكنك المراهنة بأكثر من رصيدك الحالي.', 'error');
-                console.warn('Bet amount capped at balance.');
-            }
-            betAmount = value;
-            e.target.value = betAmount; // Update input to capped value
-            updateBetDisplay();
-            updatePotentialWin();
-            console.log('Bet amount from input:', betAmount);
+            // Ensure bet amount does not exceed balance
+            betAmount = Math.min(value, balance);
+            e.target.value = betAmount; // Update input field if value was capped
+            updateUI();
         });
 
-        // Add event listeners for bet buttons
-        document.getElementById('bet-50').addEvent
+        // Handle bet action buttons
+        betButtons.forEach(button => {
+            button
