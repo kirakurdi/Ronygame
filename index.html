@@ -127,11 +127,18 @@
         .team-card.revealed-winning {
             background-color: #16A34A; /* Green for winning team */
             color: white;
+            animation: win-glow 1s infinite alternate; /* Glow for winning team */
         }
         .team-card.revealed-losing {
             background-color: #DC2626; /* Red for losing team */
             color: white;
         }
+
+        @keyframes win-glow {
+            from { box-shadow: 0 0 10px rgba(22, 163, 74, 0.5), 0 0 20px rgba(22, 163, 74, 0.3); }
+            to { box-shadow: 0 0 20px rgba(22, 163, 74, 0.8), 0 0 30px rgba(22, 163, 74, 0.5); }
+        }
+
 
         .team-card img {
             width: 70px;
@@ -350,15 +357,14 @@
 </head>
 <body>
     <div class="game-container">
-        <!-- Top Bar -->
         <div class="top-bar">
             <div class="info-item">
                 <i class="fas fa-wallet"></i>
-                <span id="balance">1000</span>
+                <span id="balance">1000.00</span>
             </div>
             <div class="info-item">
                 <i class="fas fa-hand-holding-usd"></i>
-                <span id="total-bet">0</span>
+                <span id="total-bet">0.00</span>
             </div>
             <div class="info-item">
                 <i class="fas fa-star"></i>
@@ -366,20 +372,17 @@
             </div>
         </div>
 
-        <!-- Main Game Area -->
         <div class="main-game-area">
             <div class="text-xl font-bold remaining-text" id="game-status-text">وقت التخمين المتبقي:</div>
             <div class="timer-center font-extrabold" id="timer">--</div>
 
             <div class="teams-grid" id="teams-container">
-                <!-- Team cards will be injected here by JavaScript -->
-            </div>
+                </div>
         </div>
 
-        <!-- Bet Controls -->
         <div class="bet-controls">
             <div class="bet-input-group">
-                <label for="bet-amount" class="text-lg">مبلغ النيك الرهان:</label>
+                <label for="bet-amount" class="text-lg">مبلغ الرهان:</label>
                 <input type="number" id="bet-amount" class="bet-input" value="10" min="1" step="1">
                 <div class="bet-buttons">
                     <button class="bet-button" data-amount="10">+10</button>
@@ -393,16 +396,13 @@
             <button id="place-bet-button" class="place-bet-button" disabled>ضع الرهان</button>
         </div>
 
-        <!-- Game History -->
         <div class="game-history">
-            <h3 class="history-title">نتائج نيك السابقة</h3>
+            <h3 class="history-title">نتائج الجولات السابقة</h3>
             <div class="history-list" id="history-list">
-                <!-- History items will be injected here -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- Message Box -->
     <div id="message-box" class="message-box">
         <p id="message-content"></p>
         <button id="message-box-ok">موافق</button>
@@ -418,15 +418,16 @@
 
         // Game state variables
         let balance = 1000;
-        let selectedTeam = null;
-        let betAmount = 0;
+        let selectedTeam = null; // Stores the ID of the selected team
+        let betAmount = 0; // Current bet amount in the input
         let timer = 10; // Initial countdown time
         let gameInterval;
-        let gameRound = 0;
+        let gameRound = 0; // Tracks current round
         let teamData = [];
-        let multipliers = [1.5, 1.8, 2.0, 2.2, 2.5, 2.8, 3.0, 3.5, 4.0, 5.0]; // Example multipliers
-        let currentMultiplier = 2.00;
-        let history = []; // To store game outcomes
+        const multipliers = [1.5, 1.8, 2.0, 2.2, 2.5, 2.8, 3.0, 3.5, 4.0, 5.0]; // Example multipliers
+        let currentMultiplier = 2.00; // Multiplier for the current round
+        let history = []; // To store game outcomes { outcome: 'win'/'lose', team: 'Team X', bet: 10, winnings: 20 }
+        let roundActive = false; // Flag to indicate if a round is active
 
         // DOM elements
         const balanceDisplay = document.getElementById('balance');
@@ -443,21 +444,27 @@
         const messageContent = document.getElementById('message-content');
         const messageBoxOkButton = document.getElementById('message-box-ok');
 
+        // --- Utility Functions ---
+
         // Function to display messages in a custom modal
         function showMessage(message) {
             messageContent.textContent = message;
             messageBox.classList.add('active');
         }
 
-        // Event listener for message box OK button
-        messageBoxOkButton.addEventListener('click', () => {
-            messageBox.classList.remove('active');
-        });
+        // Get a random multiplier from the defined list
+        function getRandomMultiplier() {
+            const randomIndex = Math.floor(Math.random() * multipliers.length);
+            return multipliers[randomIndex].toFixed(2); // Ensure 2 decimal places
+        }
+
+        // --- Game Logic Functions ---
 
         // Initialize game: fetch team data and set up UI
         async function initializeGame() {
             console.log("initializeGame: اللعبة تبدأ.");
-            // Placeholder for team images. In a real app, you might fetch these or have them locally.
+
+            // Placeholder for team images.
             const placeholderImages = [
                 'https://placehold.co/70x70/FF0000/FFFFFF?text=Team+A', // Red
                 'https://placehold.co/70x70/0000FF/FFFFFF?text=Team+B', // Blue
@@ -471,36 +478,32 @@
             teamData = Array.from({ length: 6 }, (_, i) => ({
                 id: `team${i + 1}`,
                 name: `الفريق ${i + 1}`,
-                image: placeholderImages[i % placeholderImages.length], // Use placeholder images
-                multiplier: getRandomMultiplier() // Assign a random multiplier
+                image: placeholderImages[i % placeholderImages.length],
+                multiplier: getRandomMultiplier() // Assign a random multiplier for each team
             }));
             console.log("initializeGame: تم إنشاء بيانات الفرق.", teamData);
 
             try {
-                renderTeams(); // Call to render teams
+                renderTeams();
                 console.log("initializeGame: تم استدعاء renderTeams.");
             } catch (e) {
                 console.error("initializeGame: خطأ في renderTeams:", e);
                 showMessage(`خطأ فادح في تهيئة الفرق: ${e.message}`);
-                return; // Stop initialization if team rendering fails
+                return;
             }
 
-            updateUI(); // Call to update UI (includes setting placeBetButton.disabled)
+            updateUI();
             console.log("initializeGame: تم تحديث واجهة المستخدم.");
 
-            startNewRound(); // Call to start timer
+            startNewRound();
             console.log("initializeGame: تم بدء جولة جديدة.");
-        }
-
-        // Get a random multiplier from the defined list
-        function getRandomMultiplier() {
-            return multipliers[Math.floor(Math.random() * multipliers.length)].toFixed(2);
         }
 
         // Render team cards dynamically
         function renderTeams() {
             console.log("renderTeams: بدء عرض الفرق.");
             teamsContainer.innerHTML = ''; // Clears container
+
             if (!teamsContainer) {
                 console.error("renderTeams: teamsContainer غير موجود أو غير معرف!");
                 showMessage("خطأ: لا يمكن العثور على حاوية الفرق (teamsContainer).");
@@ -523,9 +526,15 @@
                         <span class="multiplier">x${team.multiplier}</span>
                         <div class="bet-amount-display" id="bet-display-${team.id}">0</div>
                     `;
-                    teamCard.addEventListener('click', () => selectTeam(team.id));
+                    teamCard.addEventListener('click', () => {
+                        if (roundActive) { // Only allow selection if round is active
+                            selectTeam(team.id);
+                        } else {
+                            showMessage("لا يمكنك اختيار فريق حاليًا. انتظر بدء الجولة الجديدة.");
+                        }
+                    });
                     teamsContainer.appendChild(teamCard);
-                    console.log(`renderTeams: تم إضافة بطاقة الفريق ${team.name}.`);
+                    // console.log(`renderTeams: تم إضافة بطاقة الفريق ${team.name}.`); // Commented for less console noise
                 } catch (e) {
                     console.error(`renderTeams: خطأ في عرض الفريق ${team.name}:`, e);
                     showMessage(`خطأ في عرض الفريق ${team.name}: ${e.message}`);
@@ -534,8 +543,281 @@
             console.log("renderTeams: تم الانتهاء من عرض الفرق.");
         }
 
-        // Update the game UI
+        // Select a team
+        function selectTeam(teamId) {
+            console.log(`selectTeam: تم اختيار الفريق ${teamId}.`);
+            // Remove 'selected' class from all teams
+            document.querySelectorAll('.team-card').forEach(card => {
+                card.classList.remove('selected');
+                card.querySelector('.bet-amount-display').style.opacity = '0'; // Hide bet display
+            });
+
+            // Add 'selected' class to the clicked team
+            const newSelectedTeamCard = document.getElementById(teamId);
+            if (newSelectedTeamCard) {
+                newSelectedTeamCard.classList.add('selected');
+                newSelectedTeamCard.querySelector('.bet-amount-display').style.opacity = '1'; // Show bet display
+                selectedTeam = teamId;
+            }
+            updateUI(); // Update UI to reflect selection and button state
+        }
+
+        // Update the game UI (balance, total bet, button state, etc.)
         function updateUI() {
             console.log("updateUI: تحديث عناصر واجهة المستخدم.");
             balanceDisplay.textContent = balance.toFixed(2);
-            totalBetDisplay.textContent = be
+            totalBetDisplay.textContent = betAmount.toFixed(2); // Display current bet amount
+
+            // Enable/disable place bet button based on conditions
+            if (selectedTeam && betAmount > 0 && betAmount <= balance && roundActive) {
+                placeBetButton.disabled = false;
+                placeBetButton.textContent = `ضع الرهان (${betAmount.toFixed(2)}) على ${teamData.find(t => t.id === selectedTeam)?.name}`;
+            } else {
+                placeBetButton.disabled = true;
+                placeBetButton.textContent = `ضع الرهان`;
+            }
+
+            // Update bet amount display on the selected team card
+            document.querySelectorAll('.bet-amount-display').forEach(display => {
+                display.textContent = '0.00'; // Reset all bet displays
+            });
+            if (selectedTeam) {
+                const selectedBetDisplay = document.getElementById(`bet-display-${selectedTeam}`);
+                if (selectedBetDisplay) {
+                    selectedBetDisplay.textContent = betAmount.toFixed(2);
+                }
+            }
+
+            console.log("updateUI: تم الانتهاء من تحديث واجهة المستخدم.");
+        }
+
+        // Handle bet amount buttons
+        function handleBetButtonClick(action, amount = 0) {
+            let currentBet = parseFloat(betAmountInput.value);
+            if (isNaN(currentBet)) currentBet = 0;
+
+            switch (action) {
+                case 'add':
+                    currentBet += amount;
+                    break;
+                case 'half':
+                    currentBet = Math.floor(currentBet / 2);
+                    break;
+                case 'double':
+                    currentBet *= 2;
+                    break;
+                case 'max':
+                    currentBet = balance;
+                    break;
+            }
+            // Ensure bet does not exceed balance and is not less than 1 (or 0 if allowed)
+            betAmount = Math.max(1, Math.min(currentBet, balance));
+            betAmountInput.value = betAmount;
+            updateUI();
+        }
+
+        // Place the bet
+        async function placeBet() {
+            if (!selectedTeam) {
+                showMessage("الرجاء اختيار فريق أولاً.");
+                return;
+            }
+            if (betAmount <= 0) {
+                showMessage("الرجاء إدخال مبلغ رهان صالح.");
+                return;
+            }
+            if (betAmount > balance) {
+                showMessage("الرصيد غير كافٍ لوضع هذا الرهان.");
+                return;
+            }
+
+            // Disable controls during betting phase
+            placeBetButton.disabled = true;
+            betAmountInput.disabled = true;
+            betButtons.forEach(btn => btn.disabled = true);
+            teamsContainer.style.pointerEvents = 'none'; // Disable clicking on teams
+
+            roundActive = false; // Stop accepting new bets
+
+            balance -= betAmount; // Deduct bet amount from balance
+            updateUI();
+            showMessage(`تم وضع الرهان بمبلغ ${betAmount.toFixed(2)} على ${teamData.find(t => t.id === selectedTeam)?.name}.`);
+            console.log(`placed bet: ${betAmount.toFixed(2)} on ${selectedTeam}`);
+
+            clearInterval(gameInterval); // Stop the countdown
+            gameStatusText.textContent = "جاري الكشف عن النتيجة...";
+            timerDisplay.textContent = "⌛";
+
+            // Simulate game outcome after a short delay
+            setTimeout(() => {
+                revealOutcome();
+            }, 3000); // Wait 3 seconds to reveal outcome
+        }
+
+        // Reveal the winning team and update balance
+        function revealOutcome() {
+            console.log("revealOutcome: جاري الكشف عن النتيجة.");
+            const winningTeamIndex = Math.floor(Math.random() * teamData.length);
+            const winningTeam = teamData[winningTeamIndex];
+
+            let outcome = 'lose';
+            let winnings = 0;
+
+            document.querySelectorAll('.team-card').forEach(card => {
+                card.classList.remove('selected'); // Remove any lingering selected styles
+                card.classList.remove('revealed-winning', 'revealed-losing'); // Clean previous reveal styles
+
+                const teamId = card.id;
+                if (teamId === winningTeam.id) {
+                    card.classList.add('revealed-winning');
+                    // Check if the selected team was the winning team
+                    if (selectedTeam === teamId) {
+                        outcome = 'win';
+                        winnings = betAmount * parseFloat(winningTeam.multiplier);
+                        balance += winnings;
+                        showMessage(`تهانينا! فزت بـ ${winnings.toFixed(2)}!`);
+                        console.log(`Win! Winnings: ${winnings.toFixed(2)}`);
+                    } else {
+                        showMessage(`للأسف، خسرت. فاز الفريق ${winningTeam.name}.`);
+                        console.log(`Loss. Winning team: ${winningTeam.name}`);
+                    }
+                } else {
+                    card.classList.add('revealed-losing');
+                }
+            });
+
+            updateHistory(outcome, winningTeam.name, betAmount, winnings);
+            updateUI(); // Update UI with new balance
+
+            // Reset game state for next round
+            selectedTeam = null;
+            betAmount = 0;
+            betAmountInput.value = 10; // Reset input to default
+            currentMultiplier = getRandomMultiplier(); // New multiplier for next round
+            currentMultiplierDisplay.textContent = `x${currentMultiplier}`;
+
+            setTimeout(() => {
+                startNewRound(); // Start a new round after a brief pause
+            }, 3000); // Pause before starting new round
+        }
+
+        // Update game history display
+        function updateHistory(outcome, teamName, bet, winnings) {
+            const historyItem = { outcome, teamName, bet, winnings };
+            history.unshift(historyItem); // Add to the beginning of the array
+            // Keep history list to a reasonable length (e.g., last 10 rounds)
+            if (history.length > 10) {
+                history.pop();
+            }
+
+            renderHistory();
+        }
+
+        // Render history items
+        function renderHistory() {
+            historyList.innerHTML = '';
+            if (history.length === 0) {
+                historyList.innerHTML = '<p class="text-sm text-gray-400">لا توجد نتائج سابقة بعد.</p>';
+                return;
+            }
+
+            history.forEach(item => {
+                const li = document.createElement('div');
+                li.classList.add('history-item', item.outcome);
+                li.textContent = `${item.outcome === 'win' ? 'فوز' : 'خسارة'} - فريق ${item.teamName} (${item.bet.toFixed(2)}$ -> ${item.winnings.toFixed(2)}$)`;
+                historyList.appendChild(li);
+            });
+        }
+
+
+        // Start a new game round
+        function startNewRound() {
+            console.log("startNewRound: بدء جولة جديدة.");
+            gameRound++;
+            timer = 10; // Reset timer for new round
+            roundActive = true; // Allow betting
+            gameStatusText.textContent = `وقت التخمين المتبقي للجولة ${gameRound}:`;
+
+            // Reset team card styles
+            document.querySelectorAll('.team-card').forEach(card => {
+                card.classList.remove('selected', 'revealed-winning', 'revealed-losing');
+                card.style.animation = 'none'; // Remove win-glow animation
+                void card.offsetWidth; // Trigger reflow to restart animation if needed
+                card.querySelector('.bet-amount-display').style.opacity = '0';
+                card.querySelector('.bet-amount-display').textContent = '0.00';
+            });
+
+            // Re-enable controls
+            betAmountInput.disabled = false;
+            betButtons.forEach(btn => btn.disabled = false);
+            teamsContainer.style.pointerEvents = 'auto'; // Enable clicking on teams
+
+            updateUI(); // Update UI for new round state
+
+            clearInterval(gameInterval); // Clear any existing interval
+            gameInterval = setInterval(() => {
+                timer--;
+                timerDisplay.textContent = timer;
+
+                if (timer <= 0) {
+                    clearInterval(gameInterval);
+                    timerDisplay.textContent = "انتهى الوقت!";
+                    gameStatusText.textContent = "الكشف عن النتيجة...";
+                    placeBetButton.disabled = true; // Disable betting after time runs out
+                    betButtons.forEach(btn => btn.disabled = true);
+                    betAmountInput.disabled = true;
+                    teamsContainer.style.pointerEvents = 'none';
+
+                    // If no bet was placed, just reveal outcome without checking winnings
+                    if (!selectedTeam || betAmount === 0) {
+                        showMessage("انتهى وقت الرهان! لم تضع رهانًا في هذه الجولة.");
+                        setTimeout(() => {
+                            revealOutcome(); // Reveal outcome even if no bet was placed
+                        }, 2000);
+                    } else {
+                        // If bet was placed, proceed to revealOutcome (which was already triggered by placeBet)
+                        // Or if somehow the timer ran out before placeBet was clicked after selection
+                        // For simplicity here, we assume placeBet is clicked. If not, it means the user selected but didn't click "place bet"
+                        // So we just reveal and start new round.
+                        revealOutcome();
+                    }
+                }
+            }, 1000);
+        }
+
+        // --- Event Listeners ---
+
+        // Event listener for message box OK button
+        messageBoxOkButton.addEventListener('click', () => {
+            messageBox.classList.remove('active');
+        });
+
+        // Event listener for bet amount input
+        betAmountInput.addEventListener('input', (e) => {
+            let value = parseFloat(e.target.value);
+            if (isNaN(value) || value < 1) { // Ensure minimum bet is 1
+                value = 0;
+            }
+            betAmount = Math.min(value, balance); // Cap bet at current balance
+            e.target.value = betAmount; // Update input value after capping
+            updateUI();
+        });
+
+        // Event listeners for bet manipulation buttons
+        betButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const action = button.dataset.action;
+                const amount = parseFloat(button.dataset.amount);
+                handleBetButtonClick(action, amount);
+            });
+        });
+
+        // Event listener for place bet button
+        placeBetButton.addEventListener('click', placeBet);
+
+        // --- Initial Call ---
+        // Start the game when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', initializeGame);
+    </script>
+</body>
+</html>
