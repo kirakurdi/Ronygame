@@ -409,6 +409,13 @@
     </div>
 
     <script>
+        // Global error handler to catch uncaught exceptions and display them in the message box.
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.error("An unhandled error occurred:", { message, source, lineno, colno, error });
+            showMessage(`حدث خطأ غير متوقع: ${message}. يرجى المحاولة مرة أخرى.`);
+            return true; // Prevent default browser error handling
+        };
+
         // Game state variables
         let balance = 1000;
         let selectedTeam = null;
@@ -449,6 +456,7 @@
 
         // Initialize game: fetch team data and set up UI
         async function initializeGame() {
+            console.log("initializeGame: اللعبة تبدأ.");
             // Placeholder for team images. In a real app, you might fetch these or have them locally.
             const placeholderImages = [
                 'https://placehold.co/70x70/FF0000/FFFFFF?text=Team+A', // Red
@@ -466,10 +474,22 @@
                 image: placeholderImages[i % placeholderImages.length], // Use placeholder images
                 multiplier: getRandomMultiplier() // Assign a random multiplier
             }));
+            console.log("initializeGame: تم إنشاء بيانات الفرق.", teamData);
 
-            renderTeams();
-            updateUI();
-            startNewRound();
+            try {
+                renderTeams(); // Call to render teams
+                console.log("initializeGame: تم استدعاء renderTeams.");
+            } catch (e) {
+                console.error("initializeGame: خطأ في renderTeams:", e);
+                showMessage(`خطأ فادح في تهيئة الفرق: ${e.message}`);
+                return; // Stop initialization if team rendering fails
+            }
+
+            updateUI(); // Call to update UI (includes setting placeBetButton.disabled)
+            console.log("initializeGame: تم تحديث واجهة المستخدم.");
+
+            startNewRound(); // Call to start timer
+            console.log("initializeGame: تم بدء جولة جديدة.");
         }
 
         // Get a random multiplier from the defined list
@@ -479,75 +499,43 @@
 
         // Render team cards dynamically
         function renderTeams() {
-            teamsContainer.innerHTML = '';
+            console.log("renderTeams: بدء عرض الفرق.");
+            teamsContainer.innerHTML = ''; // Clears container
+            if (!teamsContainer) {
+                console.error("renderTeams: teamsContainer غير موجود أو غير معرف!");
+                showMessage("خطأ: لا يمكن العثور على حاوية الفرق (teamsContainer).");
+                return;
+            }
+
+            if (teamData.length === 0) {
+                console.warn("renderTeams: teamData فارغة. لا توجد فرق لعرضها.");
+                showMessage("تحذير: لا توجد فرق لتهيئة اللعبة.");
+            }
+
             teamData.forEach(team => {
-                const teamCard = document.createElement('div');
-                teamCard.classList.add('team-card');
-                teamCard.id = team.id;
-                teamCard.innerHTML = `
-                    <img src="${team.image}" alt="${team.name} شعار">
-                    <span>${team.name}</span>
-                    <span class="multiplier">x${team.multiplier}</span>
-                    <div class="bet-amount-display" id="bet-display-${team.id}">0</div>
-                `;
-                teamCard.addEventListener('click', () => selectTeam(team.id));
-                teamsContainer.appendChild(teamCard);
+                try {
+                    const teamCard = document.createElement('div');
+                    teamCard.classList.add('team-card');
+                    teamCard.id = team.id;
+                    teamCard.innerHTML = `
+                        <img src="${team.image}" alt="${team.name} شعار">
+                        <span>${team.name}</span>
+                        <span class="multiplier">x${team.multiplier}</span>
+                        <div class="bet-amount-display" id="bet-display-${team.id}">0</div>
+                    `;
+                    teamCard.addEventListener('click', () => selectTeam(team.id));
+                    teamsContainer.appendChild(teamCard);
+                    console.log(`renderTeams: تم إضافة بطاقة الفريق ${team.name}.`);
+                } catch (e) {
+                    console.error(`renderTeams: خطأ في عرض الفريق ${team.name}:`, e);
+                    showMessage(`خطأ في عرض الفريق ${team.name}: ${e.message}`);
+                }
             });
+            console.log("renderTeams: تم الانتهاء من عرض الفرق.");
         }
 
         // Update the game UI
         function updateUI() {
+            console.log("updateUI: تحديث عناصر واجهة المستخدم.");
             balanceDisplay.textContent = balance.toFixed(2);
-            totalBetDisplay.textContent = betAmount.toFixed(2);
-            currentMultiplierDisplay.textContent = `x${currentMultiplier}`;
-            placeBetButton.disabled = selectedTeam === null || betAmount <= 0 || betAmount > balance;
-            betAmountInput.value = betAmount;
-
-            // Update individual team bet displays
-            teamsContainer.querySelectorAll('.bet-amount-display').forEach(display => {
-                display.textContent = '0';
-                display.style.opacity = '0';
-            });
-            if (selectedTeam) {
-                const selectedTeamElement = document.getElementById(selectedTeam);
-                if (selectedTeamElement) {
-                    selectedTeamElement.classList.add('selected');
-                    const betDisplay = document.getElementById(`bet-display-${selectedTeam}`);
-                    if (betDisplay) {
-                        betDisplay.textContent = betAmount.toFixed(2);
-                        betDisplay.style.opacity = '1';
-                    }
-                }
-            }
-        }
-
-        // Select a team
-        function selectTeam(teamId) {
-            // Remove 'selected' class from previously selected team
-            if (selectedTeam) {
-                document.getElementById(selectedTeam).classList.remove('selected');
-                document.getElementById(`bet-display-${selectedTeam}`).style.opacity = '0';
-            }
-
-            selectedTeam = teamId;
-            document.getElementById(selectedTeam).classList.add('selected');
-            document.getElementById(`bet-display-${selectedTeam}`).style.opacity = '1';
-
-            updateUI();
-        }
-
-        // Handle bet amount input changes
-        betAmountInput.addEventListener('input', (e) => {
-            let value = parseFloat(e.target.value);
-            if (isNaN(value) || value < 0) {
-                value = 0;
-            }
-            // Ensure bet amount does not exceed balance
-            betAmount = Math.min(value, balance);
-            e.target.value = betAmount; // Update input field if value was capped
-            updateUI();
-        });
-
-        // Handle bet action buttons
-        betButtons.forEach(button => {
-            button
+            totalBetDisplay.textContent = be
