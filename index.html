@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة تخمين الفرق - تصميم جديد</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom, #1E3A8A 0%, #172B6B 100%); /* Dark blue gradient from image */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .game-container {
+            background-color: #172B6B; /* Darker blue for container */
+            border-radius: 2rem; /* More rounded corners */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); /* Stronger shadow */
+            padding: 2rem; /* Increased padding */
+            max-width: 900px; /* Wider container */
+            width: 100%;
+            text-align: center;
+            border: 3px solid #3B82F6; /* Brighter blue border */
+            position: relative;
+            color: #E0F2F7;
+            display: flex;
+            flex-direction: column;
+            gap: 1.8rem; /* Increased gap */
+        }
+
+        h1 {
+            color: #FACC15; /* Yellow title */
+            font-size: 2.8rem; /* Larger title */
+            margin-bottom: 0.8rem;
+            text-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            font-weight: 900;
+        }
+        p.description {
+            color: #9CA3AF; /* Grayish description */
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Top Bar Section */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to right, #3B82F6, #60A5FA); /* Blue gradient */
+            padding: 0.8rem 1.2rem;
+            border-radius: 1rem;
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.3);
+            border: 2px solid #60A5FA;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+        .top-bar .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #D1D5DB;
+        }
+        .top-bar .info-item i {
+            color: #FACC15;
+        }
+        .top-bar .balance-display {
+            font-size: 1.3rem; /* Larger balance */
+            font-weight: 800;
+            color: #34D399; /* Green for balance */
+            background-color: #2D3748; /* Darker background */
+            padding: 0.4rem 1rem;
+            border-radius: 0.8rem;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
+            border: 1px solid #34D399;
+        }
+
+        /* Main Game Area */
+        .main-game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+        .timer-center {
+            font-size: 4rem; /* Even larger timer */
+            font-weight: 900;
+            color: #FACC15; /* Bright yellow */
+            text-shadow: 0 0 15px #FACC15, 0 0 30px #FACC15; /* Stronger glow */
+            margin-bottom: 1.5rem;
+            background-color: #2D3748; /* Darker background */
+            padding: 1rem 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            min-width: 150px;
+            border: 3px solid #FACC15; /* Yellow border */
+            position: relative;
+            z-index: 10;
+        }
+        .remaining-text {
+            position: absolute;
+            top: -25px; /* Adjusted position */
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1rem;
+            color: #D1D5DB;
+            background-color: #2D3748;
+            padding: 0.3rem 0.8rem;
+            border-radius: 0.8rem;
+            white-space: nowrap;
+            z-index: 1;
+            border: 1px solid #4A5568;
+        }
+
+
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Adjusted for 8 teams */
+            gap: 1.2rem; /* Increased gap */
+            margin-bottom: 1.5rem;
+            width: 100%;
+        }
+        .team-card {
+            background: linear-gradient(to bottom, #2D3748, #1A202C); /* Dark gradient for cards */
+            border: 3px solid #4A5568; /* Grayish border */
+            border-radius: 1.5rem; /* More rounded */
+            padding: 1rem; /* Increased padding */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            transform: translateZ(0);
+        }
+        .team-card:hover:not(.selected):not(.disabled):not(.has-bet) {
+            transform: scale(1.07) translateY(-5px);
+            border-color: #FACC15; /* Yellow hover border */
+            box-shadow: 0 10px 20px rgba(250, 204, 21, 0.4);
+        }
+        .team-card.selected {
+            border-color: #34D399; /* Green for selected */
+            box-shadow: 0 0 0 5px rgba(52, 211, 153, 0.6);
+            transform: scale(1.07);
+        }
+        .team-card.winning {
+            border-color: #10B981; /* Darker green for winning */
+            background: linear-gradient(to bottom, #10B981, #065F46); /* Green gradient for win */
+            box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.8);
+            animation: pulse-win 1s infinite alternate;
+        }
+        .team-card.losing {
+            border-color: #EF4444; /* Red for losing */
+            background: linear-gradient(to bottom, #EF4444, #B91C1C); /* Red gradient for lose */
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.6);
+            animation: shake 0.5s;
+        }
+        .team-card.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            filter: grayscale(50%); /* Slightly desaturate disabled cards */
+        }
+        .team-card.has-bet {
+            border-color: #60A5FA; /* Blue for bet placed */
+            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.6);
+            cursor: default;
+            opacity: 0.95;
+        }
+        .team-card img {
+            width: 90px; /* Larger image */
+            height: 90px;
+            object-fit: contain;
+            border-radius: 50%;
+            margin-bottom: 0.6rem;
+            border: 3px solid #FACC15; /* Yellow border around logo */
+            box-shadow: 0 0 8px rgba(250, 204, 21, 0.6);
+        }
+        .team-card span {
+            font-weight: 700;
+            color: #E0F2F7;
+            font-size: 1rem;
+            margin-top: 0.3rem;
+            white-space: nowrap;
+        }
+        .team-card .multiplier {
+            font-size: 0.85rem; /* Larger multiplier font */
+            color: #FACC15;
+            font-weight: bold;
+            background-color: rgba(0,0,0,0.4);
+            padding: 3px 10px;
+            border-radius: 0.6rem;
+            margin-top: 0.3rem;
+            border: 1px solid rgba(250, 204, 21, 0.5);
+        }
+        .team-card .bet-amount-display {
+            position: absolute;
+            top: 8px;
+            right: 8px; /* Changed from left to right for RTL */
+            background-color: #FACC15;
+            color: #1A202C;
+            padding: 3px 10px;
+            border-radius: 0.6rem;
+            font-size: 0.9rem;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+            border: 1px solid #EAB308;
+        }
+        .team-card.has-bet .bet-amount-display {
+            opacity: 1;
+        }
+
+        /* New highlight for the spinning selection */
+        .team-card.selection-highlight {
+            border-color: #FACC15; /* Yellow highlight */
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.7), 0 0 30px rgba(250, 204, 21, 0.5); /* Stronger glow */
+            transform: scale(1.05);
+        }
+
+
+        .message-area {
+            min-height: 3.5rem; /* Increased height */
+            font-size: 1.4rem; /* Larger font */
+            font-weight: 800;
+            margin-top: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FACC15; /* Yellow for messages */
+            background-color: #2D3748;
+            padding: 1rem;
+            border-radius: 1rem;
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.3);
+            border: 2px solid #4A5568;
+        }
+        .message-area.win { color: #34D399; }
+        .message-area.lose { color: #EF4444; }
+        .message-area.thinking { color: #FACC15; }
+        .message-area.error { color: #EF4444; }
+        .message-area.info { color: #9CA3AF; }
+
+
+        .bet-amounts-group {
+            display: flex;
+            gap: 1rem; /* Increased gap */
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            padding: 1rem 1.5rem;
+            background: linear-gradient(to right, #3B82F6, #60A5FA);
+            border-radius: 1rem;
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.3);
+            border: 2px solid #60A5FA;
+        }
+        .bet-amount-button {
+            background-image: linear-gradient(to right, #DC2626, #EF4444); /* Red gradient for bets */
+            color: white;
+            padding: 0.6rem 1.2rem; /* Larger padding */
+            border-radius: 0.8rem;
+            font-size: 0.95rem; /* Larger font */
+            font-weight: 800;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            min-width: 60px;
+        }
+        .bet-amount-button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+            background-image: linear-gradient(to right, #EF4444, #F87171);
+        }
+        .bet-amount-button:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .bet-amount-button:disabled {
+            background-image: linear-gradient(to right, #9CA3AF, #D1D5DB); /* Grayish when disabled */
+            cursor: not-allowed;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+        /* Style for active bet amount button */
+        .bet-amount-button.active-bet-amount {
+            border: 2px solid #FACC15; /* Yellow border for active bet */
+            box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.5);
+            transform: scale(1.05);
+        }
+
+
+        .action-buttons-group {
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+        .action-button {
+            background-image: linear-gradient(to right, #FACC15, #FDE047); /* Yellow gradient for action */
+            color: #1F2937; /* Dark text */
+            padding: 0.7rem 1.6rem;
+            border-radius: 0.8rem;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        .action-button.large-value-bet { /* Style for 100 Million button */
+            background-image: linear-gradient(to right, #34D399, #6EE7B7); /* Green gradient */
+            color: #1F2937;
+            padding: 0.7rem 1rem; /* Smaller padding to fit text */
+            min-width: 120px; /* Ensure minimum width */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            line-height: 1.2;
+            gap: 0.2rem;
+        }
+        .action-button.large-value-bet .bet-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .action-button.large-value-bet .bet-value {
+            font-size: 1.1rem;
+            font-weight: 900;
+        }
+
+
+        .action-button:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+        .action-button:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .action-button:disabled {
+            background-image: linear-gradient(to right, #A1A1AA, #D4D4D8);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+
+        .bottom-stats-and-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* Adjusted grid for more stats */
+            gap: 1.2rem;
+            margin-top: 1.8rem;
+            padding: 1.5rem;
+            background: linear-gradient(to right, #3B82F6, #60A5FA);
+            border-radius: 1.5rem;
+            box-shadow: inset 0 3px 6px rgba(0,0,0,0.3);
+            border: 2px solid #60A5FA;
+        }
+        .bottom-stats-and-results .stat-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .bottom-stats-and-results .stat-label {
+            font-size: 0.95rem;
+            color: #D1D5DB;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .bottom-stats-and-results .stat-value {
+            font-size: 1.4rem; /* Larger value font */
+            font-weight: 900;
+            color: #FACC15; /* Yellow for values */
+        }
+        .bottom-stats-and-results .results-bar {
+            grid-column: 1 / -1; /* Span full width */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 1.2rem;
+            padding-top: 0.8rem;
+            border-top: 2px dashed #60A5FA; /* Separator */
+        }
+        .bottom-stats-and-results .results-bar .result-logo img {
+            width: 45px; /* Slightly larger logos */
+            height: 45px;
+            object-fit: contain;
+            border-radius: 50%;
+            border: 2px solid #FACC15;
+            box-shadow: 0 0 5px rgba(250, 204, 21, 0.5);
+        }
+        .bottom-stats-and-results .results-bar .result-label {
+            font-size: 1rem;
+            color: #D1D5DB;
+            font-weight: 700;
+            width: 100%;
+            margin-bottom: 0.6rem;
+        }
+
+
+        /* Keyframes for animations */
+        @keyframes pulse-win {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none; /* Initially hidden */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.active {
+            display: flex; /* Show when active */
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background-color: #1A202C; /* Dark background for general modal */
+            border-radius: 1.5rem;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+            padding: 1.5rem;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid #4A5568;
+            color: #E0F2F7;
+            position: relative;
+            transform: translateY(-50px);
+            transition: transform 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        /* Specific modal styling for results screen matching the image */
+        .modal-content.results-modal {
+            background: linear-gradient(to bottom, #34D399 0%, #10B981 100%); /* Green gradient for results modal */
+            border: 2px solid #065F46;
+            color: white; /* White text for contrast */
+            padding: 2.5rem 1.5rem; /* More padding */
+        }
+        .modal-content.results-modal.lose {
+            background: linear-gradient(to bottom, #EF4444 0%, #B91C1C 100%); /* Red gradient for losing results */
+            border: 2px solid #991B1B;
+        }
+
+        .modal-close-button {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #FACC15; /* Default yellow close button */
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .modal-close-button:hover {
+            color: #FDE047;
+        }
+        .modal-content.results-modal .modal-close-button {
+            color: white; /* White close button for green/red background */
+        }
+
+        .modal-title {
+            color: #FACC15;
+            font-size: 1.8rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .modal-content.results-modal .modal-title {
+            color: white; /* White title for results modal */
+            font-size: 2.2rem;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+            margin-bottom: 1rem;
+        }
+
+        .modal-result-message {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: white; /* White text */
+        }
+        .modal-content.results-modal .round-status-display {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: rgba(255,255,255,0.8);
+        }
+        .modal-content.results-modal .result-detail {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(0,0,0,0.2);
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .modal-content.results-modal .result-detail span:last-child {
+            font-weight: 900;
+            color: #FACC15; /* Yellow for values */
+        }
+
+        .modal-section {
+            background-color: #2D3748; /* Darker background for general modal sections */
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #4A5568;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); 
+        }
+        .modal-content.results-modal .modal-section {
+             background-color: rgba(0,0,0,0.3); /* Transpar
